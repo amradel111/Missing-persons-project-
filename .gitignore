@@ -1,18 +1,53 @@
-# Ignore Python cache and compiled files
+# Project specific
+requirements.txt
+roadmap.txt
+run_server.bat
+setup_project_structure.py
+
+# Python
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Ignore virtual environment
-venv/
-env/
-
-# Ignore environment variables and credentials
-.env
-.DS_Store
-
-# Ignore logs and temporary files
-logs/
+# Django
 *.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
 
 
