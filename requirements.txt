@@ -1,0 +1,14 @@
+Django==4.2.9
+djangorestframework==3.14.0
+Pillow==10.1.0
+psycopg2-binary==2.9.9
+django-environ==0.11.2
+drf-yasg==1.21.7
+channels==4.0.0
+django-cors-headers==4.3.1
+pytest==7.4.3
+pytest-django==4.7.0
+django-extensions==3.2.3
+black==23.11.0
+flake8==6.1.0
+mypy==1.7.1 
