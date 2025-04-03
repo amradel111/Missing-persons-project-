@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+
+{% block title %}Registration | Missing Persons Finder{% endblock %}
+
+{% block additional_styles %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Poppins:wght@300;400;500&family=Montserrat:wght@700&display=swap');
+    
+    body {
+        background: linear-gradient(to bottom, #623B81, #AC63A0);
+        overflow-x: hidden;
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    .registration-container {
+        background-color: #FFF8F0;
+        border-radius: 10px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        max-width: 800px;
+        margin: 40px auto;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .registration-header {
+        text-align: center;
+        color: #623B81;
+        margin-bottom: 30px;
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+    
+    .close-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 1.5rem;
+        color: #aaa;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        z-index: 10;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .close-btn:hover {
+        color: #623B81;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+        position: relative;
+    }
+    
+    .form-label {
+        position: absolute;
+        top: -15px;
+        left: 0;
+        font-size: 0.75rem;
+        color: #623B81;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        opacity: 0;
+        pointer-events: none;
+    }
+    
+    .form-control {
+        border: none;
+        border-bottom: 2px solid #ddd;
+        border-radius: 0;
+        padding: 12px 0;
+        background-color: transparent;
+        color: #555;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        box-shadow: none;
+        border-color: #623B81;
+        background-color: transparent;
+    }
+    
+    .btn-submit {
+        background: linear-gradient(45deg, #623B81, #AC63A0);
+        color: white;
+        border-radius: 50px;
+        padding: 12px 40px;
+        font-weight: 500;
+        float: right;
+        border: none;
+        margin-top: 20px;
+        box-shadow: 0 5px 15px rgba(172, 99, 160, 0.4);
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.9rem;
+    }
+    
+    .btn-submit:hover {
+        background: linear-gradient(45deg, #AC63A0, #623B81);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(172, 99, 160, 0.6);
+        color: white;
+    }
+    
+    /* Vintage design elements */
+    .vintage-border {
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        position: absolute;
+        width: calc(100% - 60px);
+        height: calc(100% - 60px);
+        top: 30px;
+        left: 30px;
+        pointer-events: none;
+        z-index: 0;
+    }
+    
+    .vintage-corner {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        border: 2px solid #AC63A0;
+        opacity: 0.5;
+        z-index: 1;
+    }
+    
+    .vintage-corner.top-left {
+        top: 20px;
+        left: 20px;
+        border-right: none;
+        border-bottom: none;
+    }
+    
+    .vintage-corner.top-right {
+        top: 20px;
+        right: 20px;
+        border-left: none;
+        border-bottom: none;
+    }
+    
+    .vintage-corner.bottom-left {
+        bottom: 20px;
+        left: 20px;
+        border-right: none;
+        border-top: none;
+    }
+    
+    .vintage-corner.bottom-right {
+        bottom: 20px;
+        right: 20px;
+        border-left: none;
+        border-top: none;
+    }
+    
+    .registration-form {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .app-name {
+        color: #623B81;
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
+        font-size: 2.5rem;
+        letter-spacing: 1px;
+        margin: 0;
+        text-shadow: 2px 2px 4px rgba(172, 99, 160, 0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="registration-container p-5">
+        <!-- Vintage design elements -->
+        <div class="vintage-border"></div>
+        <div class="vintage-corner top-left"></div>
+        <div class="vintage-corner top-right"></div>
+        <div class="vintage-corner bottom-left"></div>
+        <div class="vintage-corner bottom-right"></div>
+        
+        <a href="{% url 'user_auth:login' %}" class="close-btn text-decoration-none">×</a>
+        
+        <div class="registration-header">
+            <h1 class="app-name">Finder</h1>
+        </div>
+        
+        <form method="post" class="registration-form">
+            {% csrf_token %}
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        {{ form.full_name }}
+                        <label class="form-label" for="{{ form.full_name.id_for_label }}">FULL NAME</label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        {{ form.username }}
+                        <label class="form-label" for="{{ form.username.id_for_label }}">USERNAME</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                {{ form.email }}
+                <label class="form-label" for="{{ form.email.id_for_label }}">EMAIL</label>
+            </div>
+            
+            <div class="form-group">
+                {{ form.phone_number }}
+                <label class="form-label" for="{{ form.phone_number.id_for_label }}">PHONE NUMBER</label>
+            </div>
+            
+            <div class="form-group">
+                {{ form.password1 }}
+                <label class="form-label" for="{{ form.password1.id_for_label }}">PASSWORD</label>
+            </div>
+            
+            <div class="form-group">
+                {{ form.password2 }}
+                <label class="form-label" for="{{ form.password2.id_for_label }}">CONFIRM PASSWORD</label>
+            </div>
+            
+            <button type="submit" class="btn btn-submit">SUBMIT</button>
+        </form>
+    </div>
+</div>
+{% endblock %} 

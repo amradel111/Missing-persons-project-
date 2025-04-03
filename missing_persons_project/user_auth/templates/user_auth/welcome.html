@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome | Missing Persons Finder{% endblock %}
+
+{% block additional_styles %}
+<style>
+    .welcome-container {
+        max-width: 800px;
+        margin: 100px auto;
+        text-align: center;
+        padding: 40px;
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .welcome-title {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        margin-bottom: 20px;
+    }
+    
+    .welcome-message {
+        font-size: 1.2rem;
+        margin-bottom: 30px;
+    }
+    
+    .btn-dashboard {
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 50px;
+        padding: 12px 30px;
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-dashboard:hover {
+        background-color: var(--secondary-color);
+        color: white;
+        transform: translateY(-3px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="welcome-container">
+        <h1 class="welcome-title">Welcome, {{ user.username }}!</h1>
+        <p class="welcome-message">You have successfully logged in to the Missing Persons Finder application.</p>
+        <p>This application helps find missing people using facial recognition technology.</p>
+        
+        <a href="#" class="btn-dashboard">Go to Dashboard</a>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,318 @@
+{% extends 'base.html' %}
+
+{% block title %}Login | Missing Persons Finder{% endblock %}
+
+{% block additional_styles %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Poppins:wght@300;400;500&family=Pacifico&family=Montserrat:wght@700&display=swap');
+    
+    body {
+        background: linear-gradient(to bottom, #623B81, #AC63A0);
+        overflow-x: hidden;
+        font-family: 'Poppins', sans-serif;
+        height: 100vh;
+        position: relative;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .star {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: white;
+        border-radius: 50%;
+    }
+    
+    .moon {
+        position: absolute;
+        width: 150px;
+        height: 150px;
+        background: radial-gradient(circle at 30% 30%, #FFDAE7, #E0A0A8);
+        border-radius: 50%;
+        top: 80px;
+        right: 100px;
+        box-shadow: 0 0 40px rgba(224, 160, 168, 0.6);
+        filter: blur(1px);
+    }
+    
+    .moon-glow {
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        top: 55px;
+        right: 75px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.2), transparent 70%);
+        border-radius: 50%;
+    }
+    
+    .login-container {
+        position: relative;
+        background-color: #FFF8F0;
+        border-radius: 10px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        z-index: 10;
+        width: 100%;
+        max-width: 420px;
+        padding: 40px;
+        margin: 0 auto;
+        overflow: hidden;
+    }
+    
+    .login-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .app-name {
+        color: #623B81;
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
+        font-size: 2.5rem;
+        letter-spacing: 1px;
+        margin: 0;
+        text-shadow: 2px 2px 4px rgba(172, 99, 160, 0.3);
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+        position: relative;
+    }
+    
+    .input-group {
+        position: relative;
+    }
+    
+    .input-group-text {
+        color: #AC63A0;
+        font-size: 1.2rem;
+    }
+    
+    .form-control {
+        border: none;
+        border-bottom: 2px solid #ddd;
+        border-radius: 0;
+        padding: 12px 0;
+        background-color: transparent;
+        color: #555;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        box-shadow: none;
+        border-color: #623B81;
+        background-color: transparent;
+    }
+    
+    .btn-login {
+        width: 100%;
+        border-radius: 50px;
+        padding: 12px;
+        background: linear-gradient(45deg, #623B81, #AC63A0);
+        color: white;
+        font-weight: 500;
+        border: none;
+        margin-top: 15px;
+        box-shadow: 0 5px 15px rgba(172, 99, 160, 0.4);
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.9rem;
+    }
+    
+    .btn-login:hover {
+        background: linear-gradient(45deg, #AC63A0, #623B81);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(172, 99, 160, 0.6);
+    }
+    
+    .forgot-password {
+        text-align: right;
+        margin-top: 15px;
+    }
+    
+    .forgot-password a {
+        color: #AC63A0;
+        transition: all 0.3s ease;
+    }
+    
+    .forgot-password a:hover {
+        color: #623B81;
+        text-decoration: none;
+    }
+    
+    .create-account {
+        text-align: center;
+        margin-top: 20px;
+    }
+    
+    .create-account a {
+        color: #623B81;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+    
+    .create-account a:hover {
+        color: #AC63A0;
+    }
+    
+    /* Vintage design elements */
+    .vintage-border {
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        position: absolute;
+        width: calc(100% - 60px);
+        height: calc(100% - 60px);
+        top: 30px;
+        left: 30px;
+        pointer-events: none;
+        z-index: 0;
+    }
+    
+    .vintage-corner {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        border: 2px solid #AC63A0;
+        opacity: 0.5;
+        z-index: 1;
+    }
+    
+    .vintage-corner.top-left {
+        top: 20px;
+        left: 20px;
+        border-right: none;
+        border-bottom: none;
+    }
+    
+    .vintage-corner.top-right {
+        top: 20px;
+        right: 20px;
+        border-left: none;
+        border-bottom: none;
+    }
+    
+    .vintage-corner.bottom-left {
+        bottom: 20px;
+        left: 20px;
+        border-right: none;
+        border-top: none;
+    }
+    
+    .vintage-corner.bottom-right {
+        bottom: 20px;
+        right: 20px;
+        border-left: none;
+        border-top: none;
+    }
+    
+    .login-form {
+        position: relative;
+        z-index: 2;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="moon"></div>
+<div class="moon-glow"></div>
+
+<!-- Stars - Created via JavaScript -->
+
+<div class="container d-flex align-items-center justify-content-center" style="height: 100vh; position: relative; z-index: 2;">
+    <div class="login-container">
+        <!-- Vintage design elements -->
+        <div class="vintage-border"></div>
+        <div class="vintage-corner top-left"></div>
+        <div class="vintage-corner top-right"></div>
+        <div class="vintage-corner bottom-left"></div>
+        <div class="vintage-corner bottom-right"></div>
+        
+        <div class="login-header">
+            <h1 class="app-name">Finder</h1>
+        </div>
+        
+        <form method="post" class="login-form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-0">
+                        <i class="bi bi-person-fill"></i>
+                    </span>
+                    {{ form.username }}
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-0">
+                        <i class="bi bi-lock-fill"></i>
+                    </span>
+                    {{ form.password }}
+                </div>
+            </div>
+            
+            <div class="forgot-password">
+                <a href="{% url 'user_auth:password_reset' %}" class="text-decoration-none">Forgot password?</a>
+            </div>
+            
+            <button type="submit" class="btn btn-login">LOGIN</button>
+        </form>
+        
+        <div class="create-account">
+            <a href="{% url 'user_auth:register' %}" class="text-decoration-none">Create Account</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Create stars with twinkling effect
+    function createStars() {
+        const body = document.querySelector('body');
+        const numStars = 200;
+        
+        for (let i = 0; i < numStars; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.top = `${Math.random() * 100}%`;
+            star.style.left = `${Math.random() * 100}%`;
+            
+            // Vary the star sizes
+            const size = Math.random() * 3;
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+            
+            // Add glow effect to larger stars
+            if (size > 2) {
+                star.style.boxShadow = '0 0 3px rgba(255, 255, 255, 0.7)';
+            }
+            
+            // Add twinkling effect with varied durations
+            const duration = 2 + Math.random() * 5;
+            star.style.animation = `twinkle ${duration}s infinite ease-in-out`;
+            
+            // Add random delay to each star
+            star.style.animationDelay = `${Math.random() * 5}s`;
+            
+            body.appendChild(star);
+        }
+        
+        // Add keyframes for twinkling
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes twinkle {
+                0% { opacity: 0.2; }
+                50% { opacity: 1; }
+                100% { opacity: 0.2; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    window.onload = createStars;
+</script>
+{% endblock %} 
