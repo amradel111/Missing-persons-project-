@@ -22,7 +22,7 @@
     /* Top Navigation Bar */
     .top-nav {
         background-color: #FFF8F0;
-        padding: 0.75rem 2rem;
+        padding: 1rem 2rem;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         position: fixed;
         top: 0;
@@ -46,6 +46,7 @@
         font-weight: 700;
         font-size: 1.8rem;
         margin: 0;
+        text-shadow: 2px 2px 4px rgba(172, 99, 160, 0.3);
     }
 
     .nav-links {
@@ -62,7 +63,7 @@
     }
 
     .nav-link.active {
-        background-color: #623B81;
+        background: linear-gradient(45deg, #623B81, #AC63A0);
         color: white;
     }
 
@@ -250,7 +251,7 @@
     }
 
     .hidden {
-        display: none;
+        display: none !important;
     }
 
     .media-preview-overlay {
@@ -327,25 +328,60 @@
         display: flex;
         align-items: center;
         gap: 1rem;
+        position: relative;
     }
 
     .username {
         color: #623B81;
-        font-weight: 600;
+        font-weight: 500;
     }
 
-    .user-link {
-        color: #623B81;
-        text-decoration: none;
-        font-size: 0.85rem;
+    .profile-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(45deg, #623B81, #AC63A0);
+        border-radius: 50%;
         display: flex;
         align-items: center;
-        gap: 0.25rem;
+        justify-content: center;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
     }
 
-    .user-link:hover {
-        color: #AC63A0;
-        text-decoration: underline;
+    .profile-icon:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(172, 99, 160, 0.4);
+    }
+
+    .profile-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        margin-top: 0.5rem;
+        background: #FFF8F0;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        padding: 0.5rem;
+        min-width: 200px;
+        display: none;
+    }
+
+    .profile-menu.show {
+        display: block;
+    }
+
+    .profile-menu a {
+        display: block;
+        padding: 0.75rem 1rem;
+        color: #623B81;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border-radius: 5px;
+    }
+
+    .profile-menu a:hover {
+        background: rgba(172, 99, 160, 0.1);
     }
 
     .direct-profile-select {
@@ -582,40 +618,8 @@
     }
 
     /* Remove the bottom-right indicator as we'll use the grid thumbnail instead */
-    .webcam-active-indicator {
-        display: none !important;
-    }
     
-    /* Style for webcam thumbnail in grid */
-    .webcam-background-thumbnail {
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .webcam-background-thumbnail video {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transform: scaleX(-1); /* Mirror video */
-    }
-    
-    .webcam-indicator {
-        position: absolute;
-        bottom: 5px;
-        left: 5px;
-        background-color: rgba(0, 0, 0, 0.5);
-        color: white;
-        padding: 3px 8px;
-        border-radius: 10px;
-        font-size: 0.7rem;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-    }
-    
-    .webcam-indicator i {
-        animation: pulse 1.5s infinite;
-    }
+    /* Add square webcam preview in the corner */
 </style>
 {% endblock %}
 
@@ -625,23 +629,20 @@
     <div class="logo-section">
         <h1 class="app-name">Finder</h1>
         <div class="nav-links">
-            <a href="{% url 'core_app:dashboard' %}" class="nav-link">dashboard</a>
-            <a href="{% url 'core_app:upload_media' %}" class="nav-link active">upload media</a>
-            <a href="#" class="nav-link">live search</a>
+            <a href="{% url 'core_app:dashboard' %}" class="nav-link">Dashboard</a>
+            <a href="{% url 'core_app:upload_media' %}" class="nav-link active">Upload Media</a>
+            <a href="#" class="nav-link">Live Search</a>
         </div>
     </div>
     <div class="user-section">
         <span class="username">{{ user.username }}</span>
-        <div class="dropdown">
-            <a href="#" class="user-link">
-                <i class="bi bi-gear-fill"></i> Settings
-            </a>
-            <a href="#" class="user-link">
-                <i class="bi bi-shield-lock-fill"></i> Change Password
-            </a>
-            <a href="{% url 'user_auth:logout' %}" class="user-link">
-                <i class="bi bi-box-arrow-right"></i> Logout
-            </a>
+        <div class="profile-icon" onclick="toggleProfileMenu()">
+            <i class="bi bi-person-fill"></i>
+        </div>
+        <div class="profile-menu" id="profileMenu">
+            <a href="#"><i class="bi bi-gear-fill"></i> Settings</a>
+            <a href="#"><i class="bi bi-shield-lock-fill"></i> Change Password</a>
+            <a href="{% url 'user_auth:logout' %}"><i class="bi bi-box-arrow-right"></i> Logout</a>
         </div>
     </div>
 </nav>
@@ -801,6 +802,24 @@
 <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-dash@5.1.1/dist/videojs-dash.min.js"></script>
 
 <script>
+    // Function to toggle the profile menu dropdown
+    function toggleProfileMenu() {
+        const profileMenu = document.getElementById('profileMenu');
+        profileMenu.classList.toggle('show');
+    }
+    
+    // Close the profile menu when clicking outside of it
+    document.addEventListener('click', function(event) {
+        const profileMenu = document.getElementById('profileMenu');
+        const profileIcon = document.querySelector('.profile-icon');
+        
+        if (profileMenu.classList.contains('show') && 
+            !profileMenu.contains(event.target) && 
+            !profileIcon.contains(event.target)) {
+            profileMenu.classList.remove('show');
+        }
+    });
+
     document.addEventListener('DOMContentLoaded', function() {
         console.log("Document loaded");
         
@@ -832,9 +851,6 @@
         const recordingTimer = document.getElementById('recording-timer');
         const webcamExpandBtn = document.getElementById('webcam-expand-btn');
         const webcamStopBtn = document.getElementById('webcam-stop-btn');
-        const webcamActiveIndicator = document.getElementById('webcam-active-indicator');
-        const reopenWebcamBtn = document.getElementById('reopen-webcam-btn');
-        const stopWebcamBtn = document.getElementById('stop-webcam-btn');
         
         // State
         let selectedPersonId = null;
@@ -848,81 +864,6 @@
         let isWebcamActive = false;
         let backgroundVideoElement = null;
         let activeWebcamSourceId = null; // Store the ID of the active webcam source from the backend
-        
-        // Add webcam active indicator to the page
-        if (!document.getElementById('webcam-active-indicator')) {
-            // Create it dynamically to not interfere with the existing HTML
-            const indicator = document.createElement('div');
-            indicator.id = 'webcam-active-indicator';
-            indicator.className = 'webcam-active-indicator hidden';
-            indicator.innerHTML = `
-                <i class="bi bi-camera-video-fill"></i>
-                <span>Webcam active</span>
-                <button id="reopen-webcam-btn" title="View webcam">
-                    <i class="bi bi-eye"></i>
-                </button>
-                <button id="stop-webcam-btn" title="Stop webcam">
-                    <i class="bi bi-x-circle"></i>
-                </button>
-            `;
-            document.body.appendChild(indicator);
-            
-            // Get the newly created elements
-            const webcamActiveIndicator = document.getElementById('webcam-active-indicator');
-            const reopenWebcamBtn = document.getElementById('reopen-webcam-btn');
-            const stopWebcamBtn = document.getElementById('stop-webcam-btn');
-            
-            // Add event listeners for the indicator buttons
-            reopenWebcamBtn.addEventListener('click', reopenWebcamPreview);
-            stopWebcamBtn.addEventListener('click', stopWebcamCompletely);
-        }
-
-        // Add necessary CSS for the webcam indicator
-        const style = document.createElement('style');
-        style.textContent = `
-            .webcam-active-indicator {
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                background-color: rgba(98, 59, 129, 0.9);
-                color: white;
-                padding: 8px 15px;
-                border-radius: 50px;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                z-index: 1000;
-                box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
-            }
-            
-            .webcam-active-indicator i {
-                color: red;
-                animation: pulse 1.5s infinite;
-            }
-            
-            .webcam-active-indicator button {
-                background: none;
-                border: none;
-                color: white;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 24px;
-                height: 24px;
-            }
-            
-            .webcam-active-indicator button:hover {
-                transform: scale(1.2);
-            }
-            
-            @keyframes pulse {
-                0% { opacity: 0.6; }
-                50% { opacity: 1; }
-                100% { opacity: 0.6; }
-            }
-        `;
-        document.head.appendChild(style);
         
         // Event Listeners for Profile Selection
         if (profileSelector) {
@@ -1072,10 +1013,6 @@
         startRecordingBtn.addEventListener('click', startRecording);
         stopRecordingBtn.addEventListener('click', stopRecording);
 
-        // Add event listeners for webcam indicator controls
-        webcamExpandBtn.addEventListener('click', reopenWebcamPreview);
-        webcamStopBtn.addEventListener('click', stopWebcamCompletely);
-        
         // Functions
         async function populateWebcamDevices() {
             if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
@@ -1162,6 +1099,9 @@
                     // Create backend entry
                     createWebcamBackendEntry();
                     
+                    // Also create grid thumbnail with the same stream
+                    createWebcamThumbnailInGrid();
+                    
                     // Show webcam controls
                     webcamControls.style.display = 'flex';
                 })
@@ -1230,12 +1170,140 @@
             // Set the current stream to the background video
             backgroundVideoElement.srcObject = currentWebcamStream;
             
-            // Show the webcam active indicator
-            const indicator = document.getElementById('webcam-active-indicator');
-            if (indicator) indicator.classList.remove('hidden');
+            // Create a thumbnail in the grid for the active webcam
+            createWebcamThumbnailInGrid();
             
             // Hide webcam controls
             webcamControls.style.display = 'none';
+            
+            // Hide the preview overlay
+            previewOverlay.classList.remove('active');
+            previewContent.innerHTML = '';
+        }
+
+        // New function to create a webcam thumbnail in the grid
+        function createWebcamThumbnailInGrid() {
+            // First, check if we already have a webcam thumbnail
+            const existingThumbnail = document.querySelector('.media-thumbnail[data-active-webcam="true"]');
+            if (existingThumbnail) {
+                // Update the existing thumbnail
+                const videoElement = existingThumbnail.querySelector('video');
+                if (videoElement) {
+                    videoElement.srcObject = currentWebcamStream;
+                }
+                return;
+            }
+            
+            // Create a new thumbnail element
+            const thumbnailElement = document.createElement('div');
+            thumbnailElement.className = 'media-thumbnail';
+            thumbnailElement.setAttribute('data-active-webcam', 'true');
+            
+            // Create video element for live preview
+            const videoElement = document.createElement('video');
+            videoElement.autoplay = true;
+            videoElement.muted = true;
+            videoElement.playsInline = true;
+            videoElement.srcObject = currentWebcamStream;
+            videoElement.style.transform = 'scaleX(-1)'; // Mirror video
+            thumbnailElement.appendChild(videoElement);
+            
+            // Add indicator that this is a live webcam
+            const webcamIndicator = document.createElement('div');
+            webcamIndicator.className = 'webcam-indicator';
+            webcamIndicator.innerHTML = '<i class="bi bi-record-circle" style="color: red;"></i> Live';
+            webcamIndicator.style.position = 'absolute';
+            webcamIndicator.style.bottom = '5px';
+            webcamIndicator.style.left = '5px';
+            webcamIndicator.style.background = 'rgba(0, 0, 0, 0.5)';
+            webcamIndicator.style.color = 'white';
+            webcamIndicator.style.padding = '3px 8px';
+            webcamIndicator.style.borderRadius = '10px';
+            webcamIndicator.style.fontSize = '0.7rem';
+            thumbnailElement.appendChild(webcamIndicator);
+            
+            // Add actions (preview, stop)
+            const actions = document.createElement('div');
+            actions.className = 'media-actions';
+            
+            // Preview button
+            const previewBtn = document.createElement('button');
+            previewBtn.className = 'media-action-btn';
+            previewBtn.innerHTML = '<i class="bi bi-eye"></i>';
+            previewBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                reopenWebcamPreview();
+            });
+            actions.appendChild(previewBtn);
+            
+            // Stop webcam button
+            const stopBtn = document.createElement('button');
+            stopBtn.className = 'media-action-btn';
+            stopBtn.innerHTML = '<i class="bi bi-x-circle"></i>';
+            stopBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                stopWebcamCompletely();
+                thumbnailElement.remove();
+            });
+            actions.appendChild(stopBtn);
+            
+            thumbnailElement.appendChild(actions);
+            
+            // Handle direct click on the thumbnail
+            thumbnailElement.addEventListener('click', function() {
+                reopenWebcamPreview();
+            });
+            
+            // Add to the grid
+            liveSourcesGrid.appendChild(thumbnailElement);
+        }
+
+        // Update stopWebcamCompletely to remove the grid thumbnail
+        function stopWebcamCompletely() {
+            if (!isWebcamActive) {
+                return;
+            }
+            
+            console.log("Completely stopping webcam");
+            
+            // Stop all tracks
+            if (currentWebcamStream) {
+                currentWebcamStream.getTracks().forEach(track => track.stop());
+                
+                // Stop audio stream if it exists
+                if (currentWebcamStream.audioStream) {
+                    currentWebcamStream.audioStream.getTracks().forEach(track => track.stop());
+                }
+                
+                currentWebcamStream = null;
+            }
+            
+            // Remove background video element
+            if (backgroundVideoElement) {
+                backgroundVideoElement.srcObject = null;
+                backgroundVideoElement.remove();
+                backgroundVideoElement = null;
+            }
+            
+            // Remove the grid thumbnail
+            const webcamThumbnail = document.querySelector('.media-thumbnail[data-active-webcam="true"]');
+            if (webcamThumbnail) {
+                webcamThumbnail.remove();
+            }
+            
+            // Stop media recorder if active
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+            
+            // Clear recording timer if active
+            if (recordingTimerId) {
+                clearInterval(recordingTimerId);
+                recordingTimerId = null;
+            }
+            
+            // Reset state
+            isWebcamActive = false;
         }
 
         // Reopen webcam preview from background
@@ -1246,8 +1314,8 @@
             }
             
             console.log("Reopening webcam preview");
-            previewContent.innerHTML = ''; // Clear previous content
-            previewOverlay.classList.add('active'); // Show overlay
+            previewContent.innerHTML = '';
+            previewOverlay.classList.add('active'); // Show full overlay
             
             // Create a video element for the preview
             const videoElement = document.createElement('video');
@@ -1294,6 +1362,12 @@
                 backgroundVideoElement = null;
             }
             
+            // Remove the grid thumbnail
+            const webcamThumbnail = document.querySelector('.media-thumbnail[data-active-webcam="true"]');
+            if (webcamThumbnail) {
+                webcamThumbnail.remove();
+            }
+            
             // Stop media recorder if active
             if (mediaRecorder && mediaRecorder.state !== 'inactive') {
                 mediaRecorder.stop();
@@ -1304,10 +1378,6 @@
                 clearInterval(recordingTimerId);
                 recordingTimerId = null;
             }
-            
-            // Hide webcam active indicator
-            const indicator = document.getElementById('webcam-active-indicator');
-            if (indicator) indicator.classList.add('hidden');
             
             // Reset state
             isWebcamActive = false;
