@@ -1,0 +1,1840 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Upload Media | Missing Persons Finder{% endblock %}
+
+{% block additional_styles %}
+<!-- Video.js CSS -->
+<link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Poppins:wght@300;400;500&family=Montserrat:wght@700&display=swap');
+    @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css");
+    
+    body {
+        background: linear-gradient(to bottom, #623B81, #AC63A0);
+        font-family: 'Poppins', sans-serif;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Top Navigation Bar */
+    .top-nav {
+        background-color: #FFF8F0;
+        padding: 0.75rem 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .logo-section {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+    }
+
+    .app-name {
+        color: #623B81;
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
+        font-size: 1.8rem;
+        margin: 0;
+    }
+
+    .nav-links {
+        display: flex;
+        gap: 1.5rem;
+    }
+
+    .nav-link {
+        color: #623B81;
+        text-decoration: none;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+    }
+
+    .nav-link.active {
+        background-color: #623B81;
+        color: white;
+    }
+
+    .nav-link:hover:not(.active) {
+        background: rgba(172, 99, 160, 0.1);
+    }
+
+    /* Main Content */
+    .main-content {
+        margin-top: 100px;
+        padding: 2rem;
+    }
+
+    .upload-media-container {
+        background: #FFF8F0;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    }
+
+    .section-title {
+        color: #623B81;
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+    }
+
+    .profile-dropdown {
+        max-width: 300px;
+        background-color: rgba(98, 59, 129, 0.6);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 50px;
+        font-size: 1rem;
+        cursor: pointer;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .profile-dropdown:focus {
+        background-color: rgba(98, 59, 129, 0.8);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        outline: none;
+    }
+
+    .profile-select-container {
+        text-align: center;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: center;
+    }
+
+    .upload-section {
+        margin-bottom: 2rem;
+    }
+
+    .upload-label {
+        display: block;
+        color: #623B81;
+        font-weight: 500;
+        margin-bottom: 1rem;
+    }
+
+    .upload-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+
+    .upload-btn {
+        width: 150px;
+        height: 150px;
+        border: 2px dashed #AC63A0;
+        background: none;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .upload-btn:hover {
+        background: rgba(172, 99, 160, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .upload-btn i {
+        font-size: 2rem;
+        color: #623B81;
+        margin-bottom: 0.5rem;
+    }
+
+    .upload-btn span {
+        font-size: 0.8rem;
+        color: #623B81;
+        display: block;
+        text-align: center;
+    }
+
+    .media-thumbnail {
+        width: 150px;
+        height: 150px;
+        border-radius: 10px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .media-thumbnail img, 
+    .media-thumbnail video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .media-actions {
+        position: absolute;
+        top: 0;
+        right: 0;
+        padding: 0.5rem;
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .media-action-btn {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .media-action-btn:hover {
+        background: white;
+        transform: translateY(-2px);
+    }
+
+    .media-action-btn i {
+        font-size: 0.9rem;
+        color: #623B81;
+    }
+
+    .live-source-btn {
+        display: none;
+    }
+
+    .live-source-btn:hover {
+        /* Remove old styles */
+    }
+
+    .live-sources-container {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .url-input-container {
+        display: flex;
+        max-width: 600px;
+        margin-top: 1rem;
+    }
+
+    .url-input {
+        flex-grow: 1;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 5px 0 0 5px;
+    }
+
+    .url-submit-btn {
+        padding: 0.75rem 1rem;
+        border: none;
+        border-radius: 0 5px 5px 0;
+        background: #623B81;
+        color: white;
+        cursor: pointer;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .media-preview-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .media-preview-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .media-preview-content {
+        max-width: 80%;
+        max-height: 80%;
+    }
+
+    .media-preview-content img {
+        max-width: 100%;
+        max-height: 80vh;
+        border-radius: 10px;
+    }
+
+    .media-preview-content video {
+        max-width: 100%;
+        max-height: 80vh;
+        border-radius: 10px;
+    }
+
+    .media-preview-close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .media-preview-close:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: rotate(90deg);
+    }
+
+    .profile-select-container {
+        text-align: center;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: center;
+    }
+
+    .profile-select-btn {
+        display: none;
+    }
+
+    .user-section {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .username {
+        color: #623B81;
+        font-weight: 600;
+    }
+
+    .user-link {
+        color: #623B81;
+        text-decoration: none;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .user-link:hover {
+        color: #AC63A0;
+        text-decoration: underline;
+    }
+
+    .direct-profile-select {
+        display: none;
+    }
+
+    .direct-profile-item {
+        display: none;
+    }
+
+    .profile-selection-message {
+        margin-bottom: 1.5rem;
+        display: block;
+    }
+
+    .profile-selection-message.hidden {
+        display: none;
+    }
+
+    /* Adjustments for live action buttons if needed */
+    .live-action-btn {
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .webcam-select-container {
+        margin-top: 1rem;
+        padding: 1rem;
+        background-color: rgba(255, 248, 240, 0.9);
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .webcam-select-container label {
+        color: #623B81;
+        font-weight: 500;
+    }
+
+    /* Webcam Controls Styling */
+    .webcam-controls {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.6);
+        border-radius: 50px;
+        padding: 10px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        z-index: 2001;
+    }
+    
+    .webcam-buttons {
+        display: flex;
+        gap: 15px;
+    }
+    
+    .webcam-btn {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: #623B81;
+        border: none;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .webcam-btn:hover {
+        background: #AC63A0;
+        transform: scale(1.1);
+    }
+    
+    .webcam-btn i {
+        font-size: 1.5rem;
+    }
+    
+    .webcam-settings {
+        display: none !important;
+    }
+    
+    .setting-group {
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .setting-group label {
+        color: #333;
+        font-weight: 500;
+    }
+    
+    .setting-group select {
+        padding: 5px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+    }
+    
+    .settings-btn {
+        padding: 8px 15px;
+        background: #623B81;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 100%;
+    }
+    
+    .settings-btn:hover {
+        background: #AC63A0;
+    }
+    
+    .recording-timer {
+        position: absolute;
+        top: -30px;
+        background: rgba(255, 0, 0, 0.7);
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-weight: bold;
+    }
+    
+    #stop-recording-btn {
+        background-color: #d9534f;
+    }
+    
+    #stop-recording-btn:hover {
+        background-color: #c9302c;
+    }
+
+    /* Modal styling for webcam selection */
+    .modal-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+    }
+    
+    .modal-content {
+        background-color: white;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+    }
+    
+    .modal-header {
+        background-color: #623B81;
+        color: white;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .modal-header h4 {
+        margin: 0;
+        font-size: 1.2rem;
+    }
+    
+    .close-btn {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .modal-body {
+        padding: 20px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #333;
+        font-weight: 500;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 1rem;
+    }
+    
+    .form-buttons {
+        display: flex;
+        justify-content: flex-end;
+    }
+    
+    .action-btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 500;
+    }
+    
+    .primary-btn {
+        background-color: #623B81;
+        color: white;
+    }
+    
+    .primary-btn:hover {
+        background-color: #AC63A0;
+    }
+    
+    .hidden {
+        display: none !important;
+    }
+
+    /* Remove the bottom-right indicator as we'll use the grid thumbnail instead */
+    .webcam-active-indicator {
+        display: none !important;
+    }
+    
+    /* Style for webcam thumbnail in grid */
+    .webcam-background-thumbnail {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .webcam-background-thumbnail video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transform: scaleX(-1); /* Mirror video */
+    }
+    
+    .webcam-indicator {
+        position: absolute;
+        bottom: 5px;
+        left: 5px;
+        background-color: rgba(0, 0, 0, 0.5);
+        color: white;
+        padding: 3px 8px;
+        border-radius: 10px;
+        font-size: 0.7rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .webcam-indicator i {
+        animation: pulse 1.5s infinite;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Top Navigation Bar -->
+<nav class="top-nav">
+    <div class="logo-section">
+        <h1 class="app-name">Finder</h1>
+        <div class="nav-links">
+            <a href="{% url 'core_app:dashboard' %}" class="nav-link">dashboard</a>
+            <a href="{% url 'core_app:upload_media' %}" class="nav-link active">upload media</a>
+            <a href="#" class="nav-link">live search</a>
+        </div>
+    </div>
+    <div class="user-section">
+        <span class="username">{{ user.username }}</span>
+        <div class="dropdown">
+            <a href="#" class="user-link">
+                <i class="bi bi-gear-fill"></i> Settings
+            </a>
+            <a href="#" class="user-link">
+                <i class="bi bi-shield-lock-fill"></i> Change Password
+            </a>
+            <a href="{% url 'user_auth:logout' %}" class="user-link">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="main-content">
+    {% csrf_token %}
+    {% if not missing_persons %}
+    <div class="alert alert-warning">
+        <strong>No profiles found!</strong> You need to create a missing person profile before you can upload media. <a href="{% url 'core_app:dashboard' %}" class="alert-link">Go to Dashboard</a> to create a profile first.
+    </div>
+    {% endif %}
+    
+    <!-- Select Profile Section -->
+    <div class="profile-select-container">
+        <select class="form-select profile-dropdown" id="profile-selector">
+            <option value="" selected disabled>Choose profile</option>
+            {% for person in missing_persons %}
+                <option value="{{ person.id }}" data-name="{{ person.full_name }}">{{ person.full_name }} ({{ person.age }})</option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <!-- Upload Media Container -->
+    <div class="upload-media-container" id="upload-media-container">
+        <!-- Profile Selection Message -->
+        <div class="profile-selection-message" id="profile-selection-message">
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> Please select a missing person profile above before uploading media.
+            </div>
+        </div>
+        
+        <!-- Images Upload Section -->
+        <div class="upload-section">
+            <label class="upload-label">Upload missing persons images:</label>
+            <div class="upload-grid" id="images-grid">
+                <!-- Add Image Button -->
+                <label class="upload-btn" for="image-upload">
+                    <i class="bi bi-plus-lg"></i>
+                    <input type="file" id="image-upload" class="hidden" accept="image/*" multiple>
+                </label>
+                <!-- Images will be added here dynamically -->
+            </div>
+        </div>
+
+        <!-- Videos Upload Section -->
+        <div class="upload-section">
+            <label class="upload-label">Upload recorded footage:</label>
+            <div class="upload-grid" id="videos-grid">
+                <!-- Add Video Button -->
+                <label class="upload-btn" for="video-upload">
+                    <i class="bi bi-plus-lg"></i>
+                    <input type="file" id="video-upload" class="hidden" accept="video/*" multiple>
+                </label>
+                <!-- Videos will be added here dynamically -->
+            </div>
+        </div>
+
+        <!-- Live Footage Section -->
+        <div class="upload-section">
+            <label class="upload-label">Link live footage:</label>
+            
+            <!-- Live Sources Grid (Now includes add buttons) -->
+            <div class="upload-grid" id="live-sources-grid">
+                <!-- Add Live URL Button -->
+                <button type="button" class="upload-btn live-action-btn" id="url-source-btn">
+                    <i class="bi bi-link-45deg"></i>
+                    <span>Live URL</span>
+                </button>
+                
+                <!-- Add Webcam Button -->
+                <button type="button" class="upload-btn live-action-btn" id="webcam-select-btn">
+                    <i class="bi bi-camera-video"></i>
+                    <span>Web Cam</span>
+                </button>
+                
+                <!-- Live source thumbnails will be added here dynamically -->
+            </div>
+            
+            <!-- Webcam Selection Container - Initially Hidden -->
+            <div id="webcam-select-container" class="modal-container hidden">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4>Select Camera</h4>
+                        <button id="cancel-webcam-select-btn" class="close-btn"><i class="bi bi-x"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="webcam-device-select">Available Cameras:</label>
+                            <select id="webcam-device-select" class="form-control">
+                                <option value="">Loading cameras...</option>
+                            </select>
+                        </div>
+                        <div class="form-buttons">
+                            <button id="start-webcam-preview-btn" class="action-btn primary-btn">Start Preview</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- URL Input - Initially Hidden -->
+            <div class="url-input-container hidden" id="url-input-container">
+                <input type="url" class="url-input" placeholder="Enter live stream URL" id="live-url-input">
+                <button class="url-submit-btn" id="url-submit-btn">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Media Preview Overlay -->
+<div class="media-preview-overlay" id="media-preview-overlay">
+    <div class="media-preview-close" id="preview-close-btn">
+        <i class="bi bi-x"></i>
+    </div>
+    <div class="media-preview-content" id="media-preview-content">
+        <!-- Preview content will be inserted here -->
+    </div>
+    
+    <!-- Webcam Controls Container - Initially Hidden -->
+    <div class="webcam-controls" id="webcam-controls" style="display: none;">
+        <div class="webcam-buttons">
+            <button id="take-snapshot-btn" class="webcam-btn" title="Take Photo">
+                <i class="bi bi-camera"></i>
+            </button>
+            <button id="start-recording-btn" class="webcam-btn" title="Start Recording">
+                <i class="bi bi-record-circle"></i>
+            </button>
+            <button id="stop-recording-btn" class="webcam-btn" style="display: none;" title="Stop Recording">
+                <i class="bi bi-stop-circle"></i>
+            </button>
+        </div>
+        <div class="recording-timer" id="recording-timer" style="display: none;">00:00</div>
+    </div>
+</div>
+
+<!-- Replace webcam active indicator with background preview thumbnail -->
+<div id="background-webcam-container" class="hidden" style="display:none">
+    <!-- This will be cloned and inserted into the live sources grid -->
+    <div class="media-thumbnail webcam-background-thumbnail">
+        <video id="background-webcam" autoplay muted playsinline></video>
+        <div class="media-actions">
+            <button class="media-action-btn" id="webcam-expand-btn">
+                <i class="bi bi-arrows-fullscreen"></i>
+            </button>
+            <button class="media-action-btn" id="webcam-stop-btn">
+                <i class="bi bi-x-circle"></i>
+            </button>
+        </div>
+        <div class="webcam-indicator">
+            <i class="bi bi-record-circle" style="color: red;"></i> Live
+        </div>
+    </div>
+</div>
+
+<!-- Video.js JavaScript -->
+<script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+<!-- Video.js DASH Plugin -->
+<script src="https://cdn.jsdelivr.net/npm/videojs-contrib-dash@5.1.1/dist/videojs-dash.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("Document loaded");
+        
+        // DOM Elements
+        const profileSelector = document.getElementById('profile-selector');
+        const uploadMediaContainer = document.getElementById('upload-media-container');
+        const profileSelectionMessage = document.getElementById('profile-selection-message');
+        const imagesGrid = document.getElementById('images-grid');
+        const videosGrid = document.getElementById('videos-grid');
+        const liveSourcesGrid = document.getElementById('live-sources-grid');
+        const imageUploadInput = document.getElementById('image-upload');
+        const videoUploadInput = document.getElementById('video-upload');
+        const urlSourceBtn = document.getElementById('url-source-btn');
+        const webcamSelectBtn = document.getElementById('webcam-select-btn');
+        const urlInputContainer = document.getElementById('url-input-container');
+        const liveUrlInput = document.getElementById('live-url-input');
+        const urlSubmitBtn = document.getElementById('url-submit-btn');
+        const previewOverlay = document.getElementById('media-preview-overlay');
+        const previewContent = document.getElementById('media-preview-content');
+        const previewCloseBtn = document.getElementById('preview-close-btn');
+        const webcamSelectContainer = document.getElementById('webcam-select-container');
+        const webcamDeviceSelect = document.getElementById('webcam-device-select');
+        const startWebcamPreviewBtn = document.getElementById('start-webcam-preview-btn');
+        const cancelWebcamSelectBtn = document.getElementById('cancel-webcam-select-btn');
+        const webcamControls = document.getElementById('webcam-controls');
+        const takeSnapshotBtn = document.getElementById('take-snapshot-btn');
+        const startRecordingBtn = document.getElementById('start-recording-btn');
+        const stopRecordingBtn = document.getElementById('stop-recording-btn');
+        const recordingTimer = document.getElementById('recording-timer');
+        const webcamExpandBtn = document.getElementById('webcam-expand-btn');
+        const webcamStopBtn = document.getElementById('webcam-stop-btn');
+        const webcamActiveIndicator = document.getElementById('webcam-active-indicator');
+        const reopenWebcamBtn = document.getElementById('reopen-webcam-btn');
+        const stopWebcamBtn = document.getElementById('stop-webcam-btn');
+        
+        // State
+        let selectedPersonId = null;
+        let selectedPersonName = null;
+        let currentWebcamStream = null; // Keep track of the active stream
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let recordingStartTime = 0;
+        let recordingTimerId = null;
+        let currentDeviceId = null;
+        let isWebcamActive = false;
+        let backgroundVideoElement = null;
+        let activeWebcamSourceId = null; // Store the ID of the active webcam source from the backend
+        
+        // Add webcam active indicator to the page
+        if (!document.getElementById('webcam-active-indicator')) {
+            // Create it dynamically to not interfere with the existing HTML
+            const indicator = document.createElement('div');
+            indicator.id = 'webcam-active-indicator';
+            indicator.className = 'webcam-active-indicator hidden';
+            indicator.innerHTML = `
+                <i class="bi bi-camera-video-fill"></i>
+                <span>Webcam active</span>
+                <button id="reopen-webcam-btn" title="View webcam">
+                    <i class="bi bi-eye"></i>
+                </button>
+                <button id="stop-webcam-btn" title="Stop webcam">
+                    <i class="bi bi-x-circle"></i>
+                </button>
+            `;
+            document.body.appendChild(indicator);
+            
+            // Get the newly created elements
+            const webcamActiveIndicator = document.getElementById('webcam-active-indicator');
+            const reopenWebcamBtn = document.getElementById('reopen-webcam-btn');
+            const stopWebcamBtn = document.getElementById('stop-webcam-btn');
+            
+            // Add event listeners for the indicator buttons
+            reopenWebcamBtn.addEventListener('click', reopenWebcamPreview);
+            stopWebcamBtn.addEventListener('click', stopWebcamCompletely);
+        }
+
+        // Add necessary CSS for the webcam indicator
+        const style = document.createElement('style');
+        style.textContent = `
+            .webcam-active-indicator {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background-color: rgba(98, 59, 129, 0.9);
+                color: white;
+                padding: 8px 15px;
+                border-radius: 50px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                z-index: 1000;
+                box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+            }
+            
+            .webcam-active-indicator i {
+                color: red;
+                animation: pulse 1.5s infinite;
+            }
+            
+            .webcam-active-indicator button {
+                background: none;
+                border: none;
+                color: white;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 24px;
+                height: 24px;
+            }
+            
+            .webcam-active-indicator button:hover {
+                transform: scale(1.2);
+            }
+            
+            @keyframes pulse {
+                0% { opacity: 0.6; }
+                50% { opacity: 1; }
+                100% { opacity: 0.6; }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Event Listeners for Profile Selection
+        if (profileSelector) {
+            profileSelector.addEventListener('change', function() {
+                selectedPersonId = this.value;
+                console.log("Profile selected, ID:", selectedPersonId);
+                
+                if (selectedPersonId) { // Only proceed if a valid profile ID is selected
+                    // Get the selected option
+                    const selectedOption = this.options[this.selectedIndex];
+                    selectedPersonName = selectedOption.getAttribute('data-name');
+                    console.log("Selected Name:", selectedPersonName);
+                    
+                    // Hide the profile selection message
+                    if (profileSelectionMessage) {
+                        console.log("Hiding profile selection message");
+                        profileSelectionMessage.classList.add('hidden');
+                    } else {
+                        console.error("Profile selection message element not found");
+                    }
+                    
+                    // Load existing media
+                    loadExistingMedia(selectedPersonId);
+                } else {
+                    // If the user selects the default "Choose profile" option
+                    console.log("Default profile option selected, showing message");
+                    if (profileSelectionMessage) {
+                        profileSelectionMessage.classList.remove('hidden');
+                    }
+                    // Clear media grids if no profile is selected
+                    imagesGrid.innerHTML = '';
+                    videosGrid.innerHTML = '';
+                    liveSourcesGrid.innerHTML = '';
+                }
+            });
+        } else {
+            console.error("Profile selector element not found");
+        }
+        
+        // Image Upload
+        imageUploadInput.addEventListener('change', function(e) {
+            if (!selectedPersonId) {
+                alert('Please select a missing person profile first');
+                return;
+            }
+            
+            const files = e.target.files;
+            for (let i = 0; i < files.length; i++) {
+                uploadImage(files[i]);
+            }
+            // Reset input
+            this.value = '';
+        });
+        
+        // Video Upload
+        videoUploadInput.addEventListener('change', function(e) {
+            if (!selectedPersonId) {
+                alert('Please select a missing person profile first');
+                return;
+            }
+            
+            const files = e.target.files;
+            for (let i = 0; i < files.length; i++) {
+                uploadVideo(files[i]);
+            }
+            // Reset input
+            this.value = '';
+        });
+        
+        // Live URL Source
+        urlSourceBtn.addEventListener('click', function() {
+            if (!selectedPersonId) {
+                alert('Please select a missing person profile first');
+                return;
+            }
+            
+            urlInputContainer.classList.toggle('hidden');
+        });
+        
+        // Add Live URL
+        urlSubmitBtn.addEventListener('click', function() {
+            if (!selectedPersonId) {
+                alert('Please select a missing person profile first');
+                return;
+            }
+            
+            const url = liveUrlInput.value.trim();
+            if (url) {
+                addLiveUrl(url);
+                liveUrlInput.value = '';
+                urlInputContainer.classList.add('hidden');
+            } else {
+                alert('Please enter a valid URL');
+            }
+        });
+        
+        // Webcam Source
+        webcamSelectBtn.addEventListener('click', function() {
+            if (!selectedPersonId) {
+                alert('Please select a missing person profile first');
+                return;
+            }
+            console.log("Webcam select button clicked - populating devices");
+            populateWebcamDevices();
+            webcamSelectContainer.classList.remove('hidden');
+            urlInputContainer.classList.add('hidden'); // Hide URL input if open
+        });
+        
+        // Cancel Webcam Selection
+        cancelWebcamSelectBtn.addEventListener('click', function() {
+            webcamSelectContainer.classList.add('hidden');
+        });
+        
+        // Start Webcam Preview Button Click
+        startWebcamPreviewBtn.addEventListener('click', function() {
+            const selectedDeviceId = webcamDeviceSelect.value;
+            if (!selectedDeviceId) {
+                alert("Please select a webcam device.");
+                return;
+            }
+            console.log(`Starting preview for device ID: ${selectedDeviceId}`);
+            webcamSelectContainer.classList.add('hidden'); // Hide selector
+            startLocalWebcamPreview(selectedDeviceId);
+        });
+        
+        // Preview Close
+        previewCloseBtn.addEventListener('click', function() {
+            if (currentWebcamStream) {
+                // Instead of stopping the stream, keep it active in the background
+                keepWebcamActive();
+            } else {
+                // For non-webcam previews (like video.js player)
+                const player = videojs.getPlayer('live-preview-player');
+                if (player) {
+                    player.dispose();
+                    console.log("Video.js player disposed");
+                }
+            }
+            
+            // Always hide the preview overlay
+            previewOverlay.classList.remove('active');
+            previewContent.innerHTML = '';
+        });
+        
+        // Event listeners for webcam controls
+        takeSnapshotBtn.addEventListener('click', takeSnapshot);
+        startRecordingBtn.addEventListener('click', startRecording);
+        stopRecordingBtn.addEventListener('click', stopRecording);
+
+        // Add event listeners for webcam indicator controls
+        webcamExpandBtn.addEventListener('click', reopenWebcamPreview);
+        webcamStopBtn.addEventListener('click', stopWebcamCompletely);
+        
+        // Functions
+        async function populateWebcamDevices() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+                console.error("enumerateDevices() not supported.");
+                webcamDeviceSelect.innerHTML = '<option value="">Cannot list devices</option>';
+                return;
+            }
+
+            // First request camera permission to get device labels
+            try {
+                // Request temporary access to any camera to get permission
+                const tempStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                
+                // Now we can enumerate devices with labels
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                
+                // Stop the temporary stream immediately
+                tempStream.getTracks().forEach(track => track.stop());
+                
+                // Process device list
+                webcamDeviceSelect.innerHTML = ''; // Clear existing options
+                let count = 0;
+                
+                devices.forEach(device => {
+                    if (device.kind === 'videoinput') {
+                        const option = document.createElement('option');
+                        option.value = device.deviceId;
+                        option.text = device.label || `Camera ${count + 1}`;
+                        webcamDeviceSelect.appendChild(option);
+                        count++;
+                    }
+                });
+                
+                if (count === 0) {
+                    webcamDeviceSelect.innerHTML = '<option value="">No cameras found</option>';
+                }
+            } catch (err) {
+                console.error('Error accessing camera:', err);
+                
+                if (err.name === 'NotAllowedError') {
+                    webcamDeviceSelect.innerHTML = '<option value="">Camera access denied</option>';
+                } else if (err.name === 'NotFoundError') {
+                    webcamDeviceSelect.innerHTML = '<option value="">No camera detected</option>';
+                } else {
+                    webcamDeviceSelect.innerHTML = `<option value="">Error: ${err.message}</option>`;
+                }
+            }
+        }
+        
+        async function startLocalWebcamPreview(deviceId) {
+            console.log(`Attempting to access webcam with deviceId: ${deviceId || 'default'}`);
+            previewContent.innerHTML = '';
+            previewOverlay.classList.add('active');
+            
+            // Simple function to stop any existing stream
+            if (currentWebcamStream) {
+                currentWebcamStream.getTracks().forEach(track => track.stop());
+                currentWebcamStream = null;
+            }
+            
+            // Basic constraints
+            const constraints = {
+                video: deviceId ? { deviceId: { exact: deviceId } } : true,
+                audio: false
+            };
+            
+            navigator.mediaDevices.getUserMedia(constraints)
+                .then(stream => {
+                    // Store stream for later use
+                    currentWebcamStream = stream;
+                    isWebcamActive = true;
+                    
+                    // Create video element
+                    const video = document.createElement('video');
+                    video.id = 'local-webcam-preview';
+                    video.srcObject = stream;
+                    video.autoplay = true;
+                    video.playsInline = true;
+                    video.style.maxWidth = '100%';
+                    video.style.maxHeight = '80vh';
+                    video.style.transform = 'scaleX(-1)';
+                    previewContent.appendChild(video);
+                    
+                    // Create backend entry
+                    createWebcamBackendEntry();
+                    
+                    // Show webcam controls
+                    webcamControls.style.display = 'flex';
+                })
+                .catch(err => {
+                    console.error('Error accessing webcam:', err);
+                    let errorMsg = 'Could not access webcam.';
+                    
+                    if (err.name === 'NotAllowedError') {
+                        errorMsg = 'Camera permission denied. Please allow camera access in your browser settings.';
+                    } else if (err.name === 'NotFoundError') {
+                        errorMsg = 'No camera found on your device.';
+                    }
+                    
+                    previewContent.innerHTML = `<p style="color:red;">${errorMsg}</p>`;
+                });
+        }
+
+        function createWebcamBackendEntry() {
+            if (!selectedPersonId) return;
+            
+            // Get CSRF token
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            
+            // Use XHR for more consistent handling
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', `/api/missing-persons/${selectedPersonId}/webcam/add/`, true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.setRequestHeader('X-CSRFToken', csrfToken);
+            
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    try {
+                        const data = JSON.parse(xhr.responseText);
+                        if (data.success) {
+                            console.log('Webcam source added with ID:', data.source_id);
+                        }
+                    } catch (e) {
+                        console.error('Error parsing response:', e);
+                    }
+                }
+            };
+            
+            xhr.send(JSON.stringify({}));
+        }
+
+        // Keep webcam active in background
+        function keepWebcamActive() {
+            if (!currentWebcamStream) {
+                return;
+            }
+            
+            console.log("Keeping webcam active in background");
+            
+            // Create an invisible video element to keep the stream active
+            if (!backgroundVideoElement) {
+                backgroundVideoElement = document.createElement('video');
+                backgroundVideoElement.id = 'background-webcam';
+                backgroundVideoElement.style.position = 'absolute';
+                backgroundVideoElement.style.left = '-9999px'; // Off-screen
+                backgroundVideoElement.style.top = '-9999px';
+                backgroundVideoElement.autoplay = true;
+                backgroundVideoElement.muted = true;
+                document.body.appendChild(backgroundVideoElement);
+            }
+            
+            // Set the current stream to the background video
+            backgroundVideoElement.srcObject = currentWebcamStream;
+            
+            // Show the webcam active indicator
+            const indicator = document.getElementById('webcam-active-indicator');
+            if (indicator) indicator.classList.remove('hidden');
+            
+            // Hide webcam controls
+            webcamControls.style.display = 'none';
+        }
+
+        // Reopen webcam preview from background
+        function reopenWebcamPreview() {
+            if (!isWebcamActive || !currentWebcamStream) {
+                console.error("No active webcam to reopen");
+                return;
+            }
+            
+            console.log("Reopening webcam preview");
+            previewContent.innerHTML = ''; // Clear previous content
+            previewOverlay.classList.add('active'); // Show overlay
+            
+            // Create a video element for the preview
+            const videoElement = document.createElement('video');
+            videoElement.id = 'local-webcam-preview';
+            videoElement.srcObject = currentWebcamStream;
+            videoElement.autoplay = true;
+            videoElement.playsInline = true;
+            videoElement.style.maxWidth = '100%';
+            videoElement.style.maxHeight = '80vh';
+            videoElement.style.transform = 'scaleX(-1)';
+            previewContent.appendChild(videoElement);
+            
+            // Show webcam controls
+            webcamControls.style.display = 'flex';
+            
+            // Reset recording UI if needed
+            resetRecordingUI();
+        }
+
+        // Completely stop the webcam
+        function stopWebcamCompletely() {
+            if (!isWebcamActive) {
+                return;
+            }
+            
+            console.log("Completely stopping webcam");
+            
+            // Stop all tracks
+            if (currentWebcamStream) {
+                currentWebcamStream.getTracks().forEach(track => track.stop());
+                
+                // Stop audio stream if it exists
+                if (currentWebcamStream.audioStream) {
+                    currentWebcamStream.audioStream.getTracks().forEach(track => track.stop());
+                }
+                
+                currentWebcamStream = null;
+            }
+            
+            // Remove background video element
+            if (backgroundVideoElement) {
+                backgroundVideoElement.srcObject = null;
+                backgroundVideoElement.remove();
+                backgroundVideoElement = null;
+            }
+            
+            // Stop media recorder if active
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+            
+            // Clear recording timer if active
+            if (recordingTimerId) {
+                clearInterval(recordingTimerId);
+                recordingTimerId = null;
+            }
+            
+            // Hide webcam active indicator
+            const indicator = document.getElementById('webcam-active-indicator');
+            if (indicator) indicator.classList.add('hidden');
+            
+            // Reset state
+            isWebcamActive = false;
+        }
+
+        // Update loadExistingMedia to avoid adding a placeholder if the webcam is active
+        function loadExistingMedia(personId) {
+            if (!personId) {
+                console.error("No person ID provided");
+                return;
+            }
+            
+            console.log("Loading existing media for person ID:", personId);
+            
+            // Clear only existing media thumbnails, preserve the add buttons
+            imagesGrid.querySelectorAll('.media-thumbnail').forEach(thumb => thumb.remove());
+            videosGrid.querySelectorAll('.media-thumbnail').forEach(thumb => thumb.remove());
+            // Clear only backend-generated live source thumbnails, not the active one
+            liveSourcesGrid.querySelectorAll('.media-thumbnail:not([data-active-webcam="true"])').forEach(thumb => thumb.remove());
+            
+            // Load existing images
+            fetch(`/api/missing-persons/${personId}/images/`)
+                .then(response => {
+                    if (!response.ok) {
+                        console.error(`Server returned ${response.status} when loading images`);
+                        return []; // Return empty array on error
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(`Loaded ${data.length} images`);
+                    data.forEach(image => {
+                        const element = createThumbnailElement(image.url, image.id, 'image', image.title);
+                        imagesGrid.appendChild(element); // Append the new thumbnail
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading images:', error);
+                });
+            
+            // Load existing videos
+            fetch(`/api/missing-persons/${personId}/videos/`)
+                .then(response => {
+                    if (!response.ok) {
+                        console.error(`Server returned ${response.status} when loading videos`);
+                        return [];
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(`Loaded ${data.length} videos`);
+                    data.forEach(video => {
+                        const element = createThumbnailElement(video.url, video.id, 'video', video.title);
+                        videosGrid.appendChild(element); // Append the new thumbnail
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading videos:', error);
+                });
+            
+            // Load existing live sources
+            fetch(`/api/missing-persons/${personId}/live-sources/`)
+                .then(response => {
+                    if (!response.ok) {
+                        console.error(`Server returned ${response.status} when loading live sources`);
+                        return [];
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(`Loaded ${data.length} live sources`);
+                    data.forEach(source => {
+                        // **Important Check:** If this source is the currently active webcam, skip adding a placeholder
+                        if (isWebcamActive && source.id === activeWebcamSourceId) {
+                            console.log(`Skipping placeholder for active webcam source ID: ${source.id}`);
+                            return; // Skip to the next source
+                        }
+                        
+                        // Determine placeholder based on type
+                        const isWebcamPlaceholder = source.source_type === 'webcam';
+                        const placeholderUrl = isWebcamPlaceholder
+                            ? "{% static 'images/webcam-placeholder.svg' %}"
+                            : "{% static 'images/live-stream-placeholder.svg' %}";
+                            
+                        const element = createThumbnailElement(placeholderUrl, source.id, 'live', source.title);
+                        
+                        // Mark webcam sources with a special attribute
+                        if (isWebcamPlaceholder) {
+                            element.setAttribute('data-source-type', 'webcam');
+                        }
+                        
+                        liveSourcesGrid.appendChild(element);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading live sources:', error);
+                });
+        }
+
+        // Restore the original logic for creating media elements and handling clicks
+        function createThumbnailElement(src, id, type, title = 'Loading...') {
+            console.log(`Creating thumbnail - Type: ${type}, ID: ${id}, Title: ${title}, Raw SRC: ${src}`); // Log input
+            const div = document.createElement('div');
+            div.className = 'media-thumbnail';
+            div.id = `media-${type}-${id}`; // Use a more specific ID
+
+            // Special attribute for webcam placeholders (from backend)
+            if (type === 'live' && title.toLowerCase().includes('webcam')) {
+                div.setAttribute('data-source-type', 'webcam');
+            }
+            
+            let mediaElement;
+            if (type === 'image') {
+                mediaElement = document.createElement('img');
+                mediaElement.alt = title;
+                mediaElement.onerror = function() { // Add error handler
+                    console.error(`Error loading image thumbnail for ID ${id}. SRC: ${this.src}`);
+                    this.alt = 'Error loading image';
+                    // Optionally set a placeholder source
+                    // this.src = '{% static 'images/image-error-placeholder.svg' %}'; 
+                };
+                mediaElement.src = src; // Set src last
+                console.log(`Image element created with src: ${mediaElement.src}`);
+            } else if (type === 'video') {
+                // For videos, use video element for better thumbnails
+                mediaElement = document.createElement('video');
+                mediaElement.src = src;
+                mediaElement.muted = true; // Required for autoplay
+                mediaElement.preload = 'metadata'; // Just load metadata for thumbnail
+                
+                // Try to set poster from the first frame
+                mediaElement.addEventListener('loadeddata', function() {
+                    try {
+                        // Attempt to get the first frame as a poster image
+                        if (this.videoWidth && this.videoHeight) {
+                            this.currentTime = 0.1; // Seek a bit into the video
+                        }
+                    } catch (e) {
+                        console.error('Error setting video thumbnail time:', e);
+                    }
+                });
+            } else {
+                // For live sources, use an appropriate placeholder image
+                mediaElement = document.createElement('img');
+                const isWebcamPlaceholder = div.getAttribute('data-source-type') === 'webcam';
+                mediaElement.src = isWebcamPlaceholder 
+                    ? "{% static 'images/webcam-placeholder.svg' %}"
+                    : "{% static 'images/live-stream-placeholder.svg' %}";
+                mediaElement.alt = title;
+            }
+            
+            div.appendChild(mediaElement);
+            
+            // Add actions
+            const actions = document.createElement('div');
+            actions.className = 'media-actions';
+            
+            // Preview button
+            const previewBtn = document.createElement('button');
+            previewBtn.className = 'media-action-btn';
+            previewBtn.innerHTML = '<i class="bi bi-eye"></i>';
+            previewBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                console.log(`Preview button clicked - Type: ${type}, ID: ${id}, SRC: ${src}`);
+                const isWebcamPlaceholder = div.getAttribute('data-source-type') === 'webcam';
+                if (isWebcamPlaceholder) {
+                    if (isWebcamActive && currentWebcamStream) {
+                        console.log("Webcam placeholder clicked with active webcam - showing webcam");
+                        reopenWebcamPreview();
+                    } else {
+                        console.log("Webcam placeholder clicked but no active webcam");
+                        showPreview(src, 'webcam-placeholder'); // Use special type
+                    }
+                } else {
+                    // Default action for image, video, and live URL types
+                    showPreview(src, type);
+                }
+            });
+            actions.appendChild(previewBtn);
+            
+            // Delete button
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'media-action-btn';
+            deleteBtn.innerHTML = '<i class="bi bi-trash"></i>';
+            deleteBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                console.log(`Delete button clicked - Type: ${type}, ID: ${id}`);
+                deleteMedia(id, type, div);
+            });
+            actions.appendChild(deleteBtn);
+            
+            div.appendChild(actions);
+            
+            // Handle direct click on the thumbnail
+            div.addEventListener('click', function() {
+                console.log(`Thumbnail direct click - Type: ${type}, ID: ${id}, SRC: ${src}`);
+                const isWebcamPlaceholder = div.getAttribute('data-source-type') === 'webcam';
+                if (isWebcamPlaceholder) {
+                    if (isWebcamActive && currentWebcamStream) {
+                        console.log("Webcam placeholder direct click with active webcam - showing webcam");
+                        reopenWebcamPreview();
+                    } else {
+                        console.log("Webcam placeholder direct click but no active webcam");
+                        showPreview(src, 'webcam-placeholder'); // Use special type
+                    }
+                } else {
+                    // Default action for image, video, and live URL types
+                    showPreview(src, type);
+                }
+            });
+            
+            return div;
+        }
+
+        // COMPLETELY FIXED CORE FUNCTIONS
+        function deleteMedia(id, type, element) {
+            if (!confirm('Are you sure you want to delete this item?')) {
+                return;
+            }
+
+            const apiUrl = '/api/media/delete/';
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            if (!csrfToken) {
+                console.error('CSRF token not found');
+                alert('Error: CSRF token not found. Please refresh the page.');
+                return;
+            }
+
+            console.log(`Attempting to POST to delete media_type: ${type} with media_id: ${id} using URL: ${apiUrl}`);
+
+            fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ media_id: id, media_type: type }),
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                console.log('Delete response status:', response.status);
+                if (response.ok || response.status === 204) {
+                    element.remove();
+                    console.log(`Successfully deleted ${type} with ID: ${id}`);
+                } else {
+                    return response.text().then(text => {
+                        console.error('Delete failed response text:', text);
+                        try {
+                            // Try parsing as JSON first for structured errors
+                            const errorData = JSON.parse(text);
+                            throw new Error(`Failed to delete ${type}. Status: ${response.status}. Server message: ${errorData.error || JSON.stringify(errorData)}`);
+                        } catch (e) {
+                             // If not JSON, use the raw text
+                            throw new Error(`Failed to delete ${type}. Status: ${response.status}. Server message: ${text || 'No details'}`);
+                        }
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Delete request failed:', error);
+                alert(`Failed to delete ${type}: ${error.message}`);
+            });
+        }
+
+        function uploadImage(file) {
+            if (!selectedPersonId) {
+                alert('Please select a missing person profile first.');
+                return;
+            }
+            
+            console.log(`Uploading image: ${file.name} for person ID: ${selectedPersonId}`);
+            console.log(`File details - Size: ${file.size} bytes, Type: ${file.type}`);
+            
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            if (!csrfToken) {
+                console.error('CSRF token not found');
+                alert('Error: CSRF token not found. Please refresh the page.');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('title', file.name);
+            
+            // Log the FormData contents for debugging
+            console.log('FormData contents:');
+            for (let pair of formData.entries()) {
+                console.log(`${pair[0]}: ${pair[1]}`);
+            }
+            
+            const uploadUrl = `/api/missing-persons/${selectedPersonId}/images/upload/`;
+            console.log(`Sending upload request to: ${uploadUrl}`);
+            
+            fetch(uploadUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken
+                },
+                body: formData,
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                console.log('Upload response received:');
+                console.log('Status:', response.status);
+                console.log('Status Text:', response.statusText);
+                console.log('Headers:', [...response.headers.entries()]);
+                
+                // First handle non-OK responses
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        console.error('Server error response:', text);
+                        throw new Error(`Server error: ${response.status} ${response.statusText}`);
+                    });
+                }
+                
+                // For OK responses, try to parse as JSON
+                return response.text().then(text => {
+                    console.log('Raw server response:', text);
+                    try {
+                        const data = JSON.parse(text);
+                        console.log('Parsed response data:', data);
+                        return data;
+                    } catch (e) {
+                        console.error('Failed to parse response as JSON:', e);
+                        throw new Error('Server returned invalid JSON response');
+                    }
+                });
+            })
+            .then(data => {
+                // Log the entire response data for debugging
+                console.log('Processing response data:', JSON.stringify(data, null, 2));
+                
+                // Check for explicit error in response
+                if (data.error) {
+                    throw new Error(`Server reported error: ${data.error}`);
+                }
+                
+                // Check for success flag
+                if (data.success === false) {
+                    throw new Error('Upload failed - server reported failure');
+                }
+                
+                // Try to get image URL from different possible response formats
+                const imageUrl = data.image_url || data.url || (data.image && data.image.url);
+                if (!imageUrl) {
+                    console.error('Full server response:', data);
+                    throw new Error('Upload succeeded but image URL is missing from response');
+                }
+                
+                // Try to get image ID from different possible formats
+                const imageId = data.image_id || data.id || (data.image && data.image.id);
+                if (!imageId) {
+                    console.error('Full server response:', data);
+                    throw new Error('Upload succeeded but image ID is missing from response');
+                }
+                
+                // Create and append the thumbnail
+                console.log(`Creating thumbnail with URL: ${imageUrl}, ID: ${imageId}, Title: ${data.title || file.name}`);
+                const element = createThumbnailElement(imageUrl, imageId, 'image', data.title || file.name);
+                imagesGrid.appendChild(element);
+                
+                // Show success message
+                alert('Image uploaded successfully!');
+            })
+            .catch(error => {
+                console.error('Upload failed:', error);
+                console.error('Error details:', {
+                    name: error.name,
+                    message: error.message,
+                    stack: error.stack
+                });
+                
+                // Show user-friendly error message
+                let errorMessage = 'Failed to upload image: ';
+                if (error.message.includes('Server error')) {
+                    errorMessage += 'Server error - please try again later';
+                } else if (error.message.includes('JSON')) {
+                    errorMessage += 'Invalid response from server';
+                } else {
+                    errorMessage += error.message;
+                }
+                
+                alert(errorMessage);
+            });
+        }
+
+        function uploadVideo(file) {
+            if (!selectedPersonId) {
+                alert('Please select a missing person profile first.');
+                return;
+            }
+            
+            console.log(`Uploading video: ${file.name} for person ID: ${selectedPersonId}`);
+            
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            if (!csrfToken) {
+                console.error('CSRF token not found');
+                alert('Error: CSRF token not found. Please refresh the page.');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('video', file);
+            formData.append('title', file.name);
+            
+            fetch(`/api/missing-persons/${selectedPersonId}/videos/upload/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken
+                },
+                body: formData,
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                console.log('Upload response status:', response.status);
+                if (!response.ok) {
+                    // If response is not OK, try to read the body for error details
+                    return response.text().then(text => {
+                         console.error('Upload failed response text:', text);
+                         throw new Error(`Upload failed with status: ${response.status}. Server message: ${text || 'No details'}`);
+                     });
+                }
+                // If response is OK, parse as JSON
+                return response.json();
+            })
+            .then(data => {
+                // This block only runs if response.ok was true
+                console.log('Upload response data:', data);
+                if (data.success) {
+                    const element = createThumbnailElement(data.video_url, data.video_id, 'video', data.title);
+                    videosGrid.appendChild(element);
+                } else {
+                    // Handle cases where response is OK but API reports failure
+                    throw new Error(data.error || 'API reported an unknown error');
+                }
+            })
+            .catch(error => {
+                console.error('Upload failed:', error);
+                alert(`Failed to upload video: ${error.message}`);
+            });
+        }
+
+        function showPreview(src, type) {
+            console.log(`showPreview called - Type: ${type}, Attempting to load SRC: ${src}`); // Log entry and src
+            previewContent.innerHTML = '';
+            
+            // Dispose of any previous player
+            try {
+                const player = videojs.getPlayer('live-preview-player');
+                if (player) {
+                    player.dispose();
+                }
+            } catch (e) {
+                console.error('Error disposing video.js player:', e);
+            }
+            
+            // Handle different media types
+            if (type === 'image') {
+                const img = document.createElement('img');
+                img.alt = 'Preview Image';
+                img.onerror = function() { // Add error handler
+                    console.error(`Error loading image preview. SRC: ${this.src}`);
+                    previewContent.innerHTML = '<p style="color:red;">Error loading image preview.</p>';
+                };
+                img.onload = function() { // Log success
+                     console.log(`Image preview loaded successfully. SRC: ${this.src}`);
+                };
+                img.style.maxWidth = '100%';
+                img.style.maxHeight = '80vh';
+                img.src = src; // Set src last
+                previewContent.appendChild(img);
+                console.log(`Image element added to preview content with src: ${img.src}`);
+            } 
+            else if (type === 'video') {
+                const video = document.createElement('video');
+                video.src = src;
+                video.controls = true;
+                video.autoplay = true;
+                video.style.maxWidth = '100%';
+                video.style.maxHeight = '80vh';
+                previewContent.appendChild(video);
+            } 
+            else if (type === 'webcam-placeholder') {
+                const message = document.createElement('p');
+                message.textContent = 'Webcam is not active. Please start the webcam using the Web Cam button.';
+                message.style.color = 'white';
+                message.style.fontSize = '1.5rem';
+                previewContent.appendChild(message);
+            }
+            else if (type === 'live') {
+                const srcLower = src.toLowerCase();
+                if (srcLower.includes('.m3u8') || srcLower.includes('.mpd')) {
+                    const sourceType = srcLower.includes('.m3u8') ? 'application/x-mpegURL' : 'application/dash+xml';
+                    
+                    try {
+                        const videoEl = document.createElement('video-js');
+                        videoEl.id = 'live-preview-player';
+                        videoEl.classList.add('vjs-default-skin');
+                        videoEl.setAttribute('controls', '');
+                        videoEl.setAttribute('preload', 'auto');
+                        videoEl.style.width = '100%';
+                        videoEl.style.maxWidth = '80vw';
+                        videoEl.style.maxHeight = '80vh';
+                        
+                        const sourceEl = document.createElement('source');
+                        sourceEl.src = src;
+                        sourceEl.type = sourceType;
+                        videoEl.appendChild(sourceEl);
+                        
+                        previewContent.appendChild(videoEl);
+                        
+                        videojs('live-preview-player');
+                    } catch (e) {
+                        console.error('Error initializing video.js:', e);
+                        previewContent.innerHTML = '<p style="color:red;">Error loading stream player.</p>';
+                    }
+                } else {
+                    const message = document.createElement('p');
+                    message.textContent = 'Live preview only available for HLS (.m3u8) or DASH (.mpd) streams.';
+                    message.style.color = 'white';
+                    message.style.fontSize = '1.5rem';
+                    previewContent.appendChild(message);
+                }
+            }
+            
+            previewOverlay.classList.add('active');
+        }
+    });
+</script>
+{% endblock %} 

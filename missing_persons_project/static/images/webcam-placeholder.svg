@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 150 150">
+  <rect width="150" height="150" fill="#E0E0E0"/>
+  <g transform="translate(75,75)">
+    <!-- Webcam icon -->
+    <circle cx="0" cy="-10" r="15" fill="none" stroke="#623B81" stroke-width="2"/>
+    <circle cx="0" cy="-10" r="7" fill="#AC63A0"/>
+    <rect x="-20" y="10" width="40" height="5" rx="2" fill="#623B81"/>
+    <!-- Text -->
+    <text x="0" y="30" font-family="Arial" font-size="12" text-anchor="middle" fill="#623B81">Webcam</text>
+  </g>
+</svg> 

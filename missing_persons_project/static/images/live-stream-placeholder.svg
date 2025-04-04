@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 150 150">
+  <rect width="150" height="150" fill="#E0E0E0"/>
+  <g transform="translate(75,75)">
+    <!-- Video camera icon -->
+    <path d="M -30,-10 L -30,10 L -10,10 L -10,-10 Z M -5,-5 L 5,0 L -5,5 Z" fill="#623B81" stroke="#AC63A0" stroke-width="2"/>
+    <!-- Live indicator dot -->
+    <circle cx="-25" cy="-5" r="3" fill="#FF0000"/>
+    <!-- Text -->
+    <text x="0" y="25" font-family="Arial" font-size="12" text-anchor="middle" fill="#623B81">Live Stream</text>
+  </g>
+</svg> 

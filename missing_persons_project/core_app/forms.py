@@ -1,5 +1,6 @@
 from django import forms
 from core_app.models import MissingPerson
+from core_app.models import MissingPersonImage, RecordedVideo, LiveVideoSource
 
 
 class MissingPersonForm(forms.ModelForm):
@@ -74,3 +75,76 @@ class MissingPersonForm(forms.ModelForm):
             'last_seen_location', 'contact_phone', 'additional_info'
         ]
         # Exclude photo field as requested 
+
+class MissingPersonImageForm(forms.ModelForm):
+    """
+    Form for uploading additional images of a missing person.
+    """
+    image = forms.ImageField(
+        label='',
+        widget=forms.FileInput(attrs={
+            'class': 'form-control d-none',
+            'accept': 'image/*',
+            'data-action': 'image-upload'
+        })
+    )
+    
+    class Meta:
+        model = MissingPersonImage
+        fields = ['image']
+        
+class RecordedVideoForm(forms.ModelForm):
+    """
+    Form for uploading recorded videos for searching missing persons.
+    """
+    video = forms.FileField(
+        label='',
+        widget=forms.FileInput(attrs={
+            'class': 'form-control d-none',
+            'accept': 'video/*',
+            'data-action': 'video-upload'
+        })
+    )
+    
+    class Meta:
+        model = RecordedVideo
+        fields = ['video']
+        
+class LiveVideoUrlForm(forms.ModelForm):
+    """
+    Form for adding a live video URL source.
+    """
+    url = forms.URLField(
+        label='',
+        widget=forms.URLInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Live Stream URL'
+        })
+    )
+    
+    class Meta:
+        model = LiveVideoSource
+        fields = ['url']
+        
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.source_type = 'url'
+        if commit:
+            instance.save()
+        return instance
+        
+class LiveVideoWebcamForm(forms.ModelForm):
+    """
+    Form for setting up a webcam as a live video source.
+    """
+    class Meta:
+        model = LiveVideoSource
+        fields = []
+        
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.source_type = 'webcam'
+        # URL will be set by the view with the WebRTC connection details
+        if commit:
+            instance.save()
+        return instance 
