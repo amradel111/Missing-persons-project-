@@ -11,6 +11,10 @@ import uuid
 from core_app.models import MissingPerson, MissingPersonImage, RecordedVideo, LiveVideoSource
 from core_app.forms import MissingPersonImageForm, RecordedVideoForm, LiveVideoUrlForm, LiveVideoWebcamForm
 
+# Add these imports for chunked uploads
+from django.conf import settings
+import shutil
+
 @login_required
 def upload_media_page(request):
     """
@@ -101,6 +105,106 @@ def upload_recorded_video(request, person_id):
         })
     except Exception as e:
         return JsonResponse({'success': False, 'errors': str(e)}, status=500)
+
+# Add new endpoint for chunked uploads
+@login_required
+@require_POST
+def upload_chunk(request, person_id):
+    """
+    API endpoint to handle uploading large files in chunks.
+    """
+    try:
+        missing_person = get_object_or_404(MissingPerson, id=person_id, reported_by=request.user)
+        
+        # Get chunk metadata from request
+        chunk_number = int(request.POST.get('chunk_number', 0))
+        total_chunks = int(request.POST.get('total_chunks', 0))
+        file_type = request.POST.get('file_type', '')  # 'image' or 'video'
+        file_id = request.POST.get('file_id', '')
+        
+        if not all([total_chunks, file_type, file_id]):
+            return JsonResponse({'success': False, 'error': 'Missing required parameters'}, status=400)
+        
+        if 'chunk' not in request.FILES:
+            return JsonResponse({'success': False, 'error': 'No chunk file provided'}, status=400)
+        
+        # Define temp directory path
+        temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp_uploads', file_id)
+        os.makedirs(temp_dir, exist_ok=True)
+        
+        # Save the chunk
+        chunk_file = request.FILES['chunk']
+        chunk_path = os.path.join(temp_dir, f'chunk_{chunk_number}')
+        
+        with open(chunk_path, 'wb+') as destination:
+            for chunk in chunk_file.chunks():
+                destination.write(chunk)
+        
+        # If this is the last chunk, combine all chunks
+        if chunk_number == total_chunks - 1:
+            # Create final file
+            if file_type == 'image':
+                final_path = os.path.join(settings.MEDIA_ROOT, 'missing_persons_images', f'{file_id}.jpg')
+            else:  # video
+                final_path = os.path.join(settings.MEDIA_ROOT, 'missing_persons_videos', f'{file_id}.mp4')
+            
+            # Ensure directory exists
+            os.makedirs(os.path.dirname(final_path), exist_ok=True)
+            
+            # Combine chunks
+            with open(final_path, 'wb') as outfile:
+                for i in range(total_chunks):
+                    chunk_path = os.path.join(temp_dir, f'chunk_{i}')
+                    if os.path.exists(chunk_path):
+                        with open(chunk_path, 'rb') as infile:
+                            outfile.write(infile.read())
+            
+            # Clean up temp directory
+            shutil.rmtree(temp_dir, ignore_errors=True)
+            
+            # Create database record
+            if file_type == 'image':
+                relative_path = f'missing_persons_images/{file_id}.jpg'
+                image = MissingPersonImage(
+                    missing_person=missing_person,
+                    image=relative_path
+                )
+                image.save()
+                return JsonResponse({
+                    'success': True,
+                    'image_id': image.id,
+                    'title': image.title,
+                    'url': image.image.url
+                })
+            else:  # video
+                relative_path = f'missing_persons_videos/{file_id}.mp4'
+                video = RecordedVideo(
+                    missing_person=missing_person,
+                    video=relative_path
+                )
+                video.save()
+                return JsonResponse({
+                    'success': True,
+                    'video_id': video.id,
+                    'title': video.title,
+                    'url': video.video.url
+                })
+        
+        # If not the last chunk, return success for this chunk
+        return JsonResponse({
+            'success': True,
+            'chunk_number': chunk_number,
+            'chunks_received': chunk_number + 1,
+            'total_chunks': total_chunks
+        })
+            
+    except Exception as e:
+        # Clean up any partial uploads in case of error
+        if 'file_id' in locals() and file_id:
+            temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp_uploads', file_id)
+            shutil.rmtree(temp_dir, ignore_errors=True)
+        
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 @login_required
 @require_POST

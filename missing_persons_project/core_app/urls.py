@@ -8,7 +8,7 @@ from core_app.views.api_views import (
 )
 from core_app.views.upload_views import (
     upload_media_page, upload_person_image, upload_recorded_video,
-    add_live_url, add_webcam_source, delete_media
+    add_live_url, add_webcam_source, delete_media, upload_chunk
 )
 
 app_name = 'core_app'
@@ -26,6 +26,7 @@ urlpatterns = [
     # Media Upload API endpoints
     path('api/missing-persons/<int:person_id>/images/upload/', upload_person_image, name='upload_person_image'),
     path('api/missing-persons/<int:person_id>/videos/upload/', upload_recorded_video, name='upload_recorded_video'),
+    path('api/missing-persons/<int:person_id>/chunk/upload/', upload_chunk, name='upload_chunk'),
     path('api/missing-persons/<int:person_id>/live-url/add/', add_live_url, name='add_live_url'),
     path('api/missing-persons/<int:person_id>/webcam/add/', add_webcam_source, name='add_webcam_source'),
     path('api/media/delete/', delete_media, name='delete_media'),
