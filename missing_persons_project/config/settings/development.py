@@ -25,3 +25,15 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # INSTALLED_APPS += ['debug_toolbar']
 # MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
 INTERNAL_IPS = ['127.0.0.1']
+
+# Override the DATABASES setting from base.py to use PostgreSQL
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',  # Use PostgreSQL as the database backend
+        'NAME': 'myproject',         # Replace with your actual PostgreSQL database name
+        'USER': 'postgres',          # Using the default PostgreSQL superuser; change if needed
+        'PASSWORD': '33445566',  # Replace with your actual PostgreSQL password
+        'HOST': 'localhost',         # For local PostgreSQL
+        'PORT': '5432',              # Default PostgreSQL port
+    }
+}

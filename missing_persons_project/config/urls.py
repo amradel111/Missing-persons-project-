@@ -39,11 +39,14 @@ urlpatterns = [
     path('api/docs/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('api/redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     
-    # App URLs
+    # App URLs - API endpoints
     path('api/core/', include('core_app.urls')),
     path('api/auth/', include('user_auth.urls')),
     path('api/search/', include('search_manager.urls')),
     path('api/video/', include('video_processor.urls')),
+    
+    # App URLs - Web pages
+    path('', include('core_app.urls')),  # Mount core_app URLs at root for web pages
 ]
 
 # Add debug toolbar if in development

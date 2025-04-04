@@ -26,7 +26,6 @@ def login_view(request):
         if form.is_valid():
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
-            # Ignore remember_me option, always set session to expire when browser is closed
             
             user = authenticate(username=username, password=password)
             if user is not None:
@@ -34,7 +33,7 @@ def login_view(request):
                 # Always set session to expire when browser is closed
                 request.session.set_expiry(0)
                 
-                return redirect('user_auth:welcome')
+                return redirect('core_app:dashboard')
             else:
                 messages.error(request, "Invalid username or password.")
         else:
@@ -47,39 +46,30 @@ def login_view(request):
 
 def register_view(request):
     """View for user registration."""
-    # Always log out the user when they visit the registration page
-    if request.user.is_authenticated:
-        logout(request)
-    
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            # Don't login the user after registration
-            messages.success(request, f"Account created for {user.username}! Please log in.")
-            return redirect('user_auth:login')
-        else:
-            for field, errors in form.errors.items():
-                for error in errors:
-                    messages.error(request, f"{field}: {error}")
+            login(request, user)
+            messages.success(request, f"Account created for {user.username}!")
+            return redirect('core_app:dashboard')
     else:
         form = UserRegistrationForm()
     
     return render(request, 'user_auth/register.html', {'form': form})
 
 
-@login_required
 def logout_view(request):
     """View for user logout."""
     logout(request)
-    messages.success(request, "You have been logged out successfully!")
+    messages.info(request, "You have been logged out.")
     return redirect('user_auth:login')
 
 
 @login_required
 def welcome_view(request):
     """Simple welcome view after login."""
-    return render(request, 'user_auth/welcome.html')
+    return redirect('core_app:dashboard')
 
 
 def password_reset_request(request):
