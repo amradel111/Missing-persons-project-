@@ -89,11 +89,15 @@ def upload_recorded_video(request, person_id):
         )
         video.save()
         
+        # Ensure we return both url and video_url for backward compatibility
+        video_url = video.video.url
+        
         return JsonResponse({
             'success': True,
             'video_id': video.id,
             'title': video.title,
-            'url': video.video.url
+            'url': video_url,
+            'video_url': video_url
         })
     except Exception as e:
         return JsonResponse({'success': False, 'errors': str(e)}, status=500)

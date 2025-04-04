@@ -1668,9 +1668,6 @@
                 console.log(`Creating thumbnail with URL: ${imageUrl}, ID: ${imageId}, Title: ${data.title || file.name}`);
                 const element = createThumbnailElement(imageUrl, imageId, 'image', data.title || file.name);
                 imagesGrid.appendChild(element);
-                
-                // Show success message
-                alert('Image uploaded successfully!');
             })
             .catch(error => {
                 console.error('Upload failed:', error);
@@ -1737,8 +1734,30 @@
                 // This block only runs if response.ok was true
                 console.log('Upload response data:', data);
                 if (data.success) {
-                    const element = createThumbnailElement(data.video_url, data.video_id, 'video', data.title);
+                    // Fix: Use the correct URL from the response and create a thumbnail element with it
+                    const videoUrl = data.url || data.video_url; // Handle both possible response formats
+                    console.log('Creating video thumbnail with URL:', videoUrl);
+                    
+                    const element = createThumbnailElement(videoUrl, data.video_id, 'video', data.title);
                     videosGrid.appendChild(element);
+                    
+                    // Force the video thumbnail to load immediately by creating a temporary video element
+                    const tempVideo = document.createElement('video');
+                    tempVideo.src = videoUrl;
+                    tempVideo.style.display = 'none';
+                    tempVideo.preload = 'metadata';
+                    document.body.appendChild(tempVideo);
+                    
+                    // Remove temp video after it has loaded metadata
+                    tempVideo.addEventListener('loadedmetadata', function() {
+                        document.body.removeChild(tempVideo);
+                    });
+                    
+                    // Handle case where metadata doesn't load
+                    tempVideo.addEventListener('error', function() {
+                        console.error('Error preloading video metadata:', this.error);
+                        document.body.removeChild(tempVideo);
+                    });
                 } else {
                     // Handle cases where response is OK but API reports failure
                     throw new Error(data.error || 'API reported an unknown error');
