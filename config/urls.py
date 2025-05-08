@@ -42,8 +42,6 @@ urlpatterns = [
     # App URLs - API endpoints
     path('api/core/', include('core_app.urls')),
     path('api/auth/', include('user_auth.urls')),
-    path('api/search/', include('search_manager.urls')),
-    path('api/video/', include('video_processor.urls')),
     
     # App URLs - Web pages
     path('', include('core_app.urls')),  # Mount core_app URLs at root for web pages

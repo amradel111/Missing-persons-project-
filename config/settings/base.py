@@ -37,8 +37,6 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     'core_app.apps.CoreAppConfig',
     'user_auth.apps.UserAuthConfig',
-    'search_manager.apps.SearchManagerConfig',
-    'video_processor.apps.VideoProcessorConfig',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
