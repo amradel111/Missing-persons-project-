@@ -1,0 +1,6 @@
+@echo off
+cd /d "D:\project\Missing-persons-project"
+echo Activating virtual environment...
+call new_venv\Scripts\activate.bat
+echo Starting Django server...
+python manage.py runserver 

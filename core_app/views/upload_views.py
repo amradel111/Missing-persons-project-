@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from django.db import models
 import json
 import os
 import uuid
@@ -22,7 +23,25 @@ def upload_media_page(request):
     for missing persons.
     """
     # Get all missing persons reported by the current user
-    missing_persons = MissingPerson.objects.filter(reported_by=request.user)
+    # and prefetch their webcam live sources
+    missing_persons_qs = MissingPerson.objects.filter(
+        reported_by=request.user
+    ).prefetch_related(
+        models.Prefetch(
+            'live_video_sources',
+            queryset=LiveVideoSource.objects.filter(source_type='webcam'),
+            to_attr='webcam_sources'
+        )
+    )
+
+    missing_persons_list = []
+    for person in missing_persons_qs:
+        # The webcam_sources attribute is now directly on the person object due to to_attr
+        # If you expect only one active webcam source, you might want to get person.webcam_sources[0] if person.webcam_sources else None
+        missing_persons_list.append({
+            'person': person,
+            'webcam_sources': person.webcam_sources # This will be a list of webcam LiveVideoSource objects
+        })
     
     # Initialize all forms
     image_form = MissingPersonImageForm()
@@ -31,7 +50,7 @@ def upload_media_page(request):
     webcam_form = LiveVideoWebcamForm()
     
     context = {
-        'missing_persons': missing_persons,
+        'missing_persons_data': missing_persons_list, # Changed from missing_persons
         'image_form': image_form,
         'video_form': video_form,
         'url_form': url_form,

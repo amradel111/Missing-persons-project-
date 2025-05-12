@@ -10,6 +10,7 @@ from core_app.views.upload_views import (
     upload_media_page, upload_person_image, upload_recorded_video,
     add_live_url, add_webcam_source, delete_media, upload_chunk
 )
+from core_app.views.search_views import live_search_page, log_match_view, live_search_redirect
 
 app_name = 'core_app'
 
@@ -38,7 +39,12 @@ urlpatterns = [
     
     # API endpoints
     path('api/missing-persons/<int:person_id>/', get_missing_person, name='get_missing_person'),
+    path('api/matches/log/', log_match_view, name='log_match'),
     
     # Missing person profiles management
     path('missing-persons/<int:person_id>/delete/', delete_missing_person, name='delete_missing_person'),
+
+    # Live Search Pages
+    path('search/live/person/<int:person_id>/source/<int:source_id>/', live_search_page, name='live_search_page'),
+    path('live-search-redirect/', live_search_redirect, name='live_search_redirect'),
 ]
