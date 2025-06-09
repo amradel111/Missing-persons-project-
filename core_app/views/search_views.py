@@ -36,7 +36,7 @@ def live_search_redirect(request):
                 # Include device_id parameter if provided
                 redirect_url = reverse('core_app:live_search_page', kwargs={'person_id': person.id, 'source_id': webcam_source.id})
                 if device_id:
-                    redirect_url += f'?device_id={device_id}'
+                    redirect_url += '?device_id={}'.format(device_id)
                 return redirect(redirect_url)
             except LiveVideoSource.DoesNotExist:
                 # If the provided source_id is invalid or doesn't belong to the user,
@@ -53,22 +53,22 @@ def live_search_redirect(request):
             # Redirect to the live search page with this source
             redirect_url = reverse('core_app:live_search_page', kwargs={'person_id': person.id, 'source_id': webcam_source.id})
             if device_id:
-                redirect_url += f'?device_id={device_id}'
+                redirect_url += '?device_id={}'.format(device_id)
             return redirect(redirect_url)
         else:
             # Create a new webcam source
             webcam_source = LiveVideoSource.objects.create(
                 missing_person=person,
                 source_type='webcam',
-                url=f"webcam://auto-created"
+                url="webcam://auto-created"
             )
             redirect_url = reverse('core_app:live_search_page', kwargs={'person_id': person.id, 'source_id': webcam_source.id})
             if device_id:
-                redirect_url += f'?device_id={device_id}'
+                redirect_url += '?device_id={}'.format(device_id)
             return redirect(redirect_url)
             
     except Exception as e:
-        return HttpResponseBadRequest(f"Error: {str(e)}")
+        return HttpResponseBadRequest("Error: {}".format(str(e)))
 
 @login_required
 def live_search_page(request, person_id, source_id):
@@ -135,7 +135,7 @@ def log_match_view(request):
                 live_source_instance = LiveVideoSource.objects.get(id=source_id, missing_person=missing_person)
             except LiveVideoSource.DoesNotExist:
                 # Log a warning or handle as appropriate if source_id is provided but not found
-                print(f"Warning: LiveVideoSource with id {source_id} not found for person {person_id}.")
+                print("Warning: LiveVideoSource with id {} not found for person {}.".format(source_id, person_id))
                 pass # Proceed to save match without specific source linkage if it's not critical
 
         match = SearchMatch.objects.create(
@@ -149,15 +149,15 @@ def log_match_view(request):
                 format, imgstr = frame_data_base64.split(';base64,') 
                 ext = format.split('/')[-1] 
                 image_data = base64.b64decode(imgstr)
-                file_name = f'snapshot_{uuid.uuid4().hex}.{ext}'
+                file_name = 'snapshot_{}.{}'.format(uuid.uuid4().hex, ext)
                 match.snapshot_image.save(file_name, ContentFile(image_data), save=True)
             except Exception as e:
-                print(f"Error saving snapshot image for match {match.id}: {e}")
+                print("Error saving snapshot image for match {}: {}".format(match.id, e))
                 # Log this error but don't fail the whole match logging
 
         return JsonResponse({'success': True, 'match_id': match.id, 'message': 'Match logged successfully.'}, status=201)
     except json.JSONDecodeError:
         return HttpResponseBadRequest("Invalid JSON data.")
     except Exception as e:
-        print(f"Error in log_match_view: {e}")
+        print("Error in log_match_view: {}".format(e))
         return JsonResponse({'success': False, 'error': str(e)}, status=500) 

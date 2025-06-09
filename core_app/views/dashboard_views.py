@@ -32,7 +32,7 @@ def dashboard_view(request):
             missing_person.save()
             
             action = "updated" if profile_id else "created"
-            messages.success(request, f"Missing person record {action} successfully.")
+            messages.success(request, "Missing person record {} successfully.".format(action))
             return redirect('core_app:dashboard')
         else:
             messages.error(request, "Please correct the errors below.")

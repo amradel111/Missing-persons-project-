@@ -15,7 +15,7 @@ class UserProfile(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.user.username}'s profile"
+        return "{}'s profile".format(self.user.username)
 
 
 @receiver(post_save, sender=User)

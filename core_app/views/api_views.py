@@ -46,7 +46,7 @@ def delete_missing_person(request, person_id):
     # Delete the profile
     missing_person.delete()
     
-    messages.success(request, f"Profile for '{person_name}' has been deleted successfully.")
+    messages.success(request, "Profile for '{}' has been deleted successfully.".format(person_name))
     return redirect('core_app:dashboard')
 
 @login_required

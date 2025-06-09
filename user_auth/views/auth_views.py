@@ -51,7 +51,7 @@ def register_view(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            messages.success(request, f"Account created for {user.username}!")
+            messages.success(request, "Account created for {}!".format(user.username))
             return redirect('core_app:dashboard')
     else:
         form = UserRegistrationForm()

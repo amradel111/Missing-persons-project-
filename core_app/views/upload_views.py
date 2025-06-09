@@ -153,7 +153,7 @@ def upload_chunk(request, person_id):
         
         # Save the chunk
         chunk_file = request.FILES['chunk']
-        chunk_path = os.path.join(temp_dir, f'chunk_{chunk_number}')
+        chunk_path = os.path.join(temp_dir, 'chunk_{}'.format(chunk_number))
         
         with open(chunk_path, 'wb+') as destination:
             for chunk in chunk_file.chunks():
@@ -163,9 +163,9 @@ def upload_chunk(request, person_id):
         if chunk_number == total_chunks - 1:
             # Create final file
             if file_type == 'image':
-                final_path = os.path.join(settings.MEDIA_ROOT, 'missing_persons_images', f'{file_id}.jpg')
+                final_path = os.path.join(settings.MEDIA_ROOT, 'missing_persons_images', '{}.jpg'.format(file_id))
             else:  # video
-                final_path = os.path.join(settings.MEDIA_ROOT, 'missing_persons_videos', f'{file_id}.mp4')
+                final_path = os.path.join(settings.MEDIA_ROOT, 'missing_persons_videos', '{}.mp4'.format(file_id))
             
             # Ensure directory exists
             os.makedirs(os.path.dirname(final_path), exist_ok=True)
@@ -173,7 +173,7 @@ def upload_chunk(request, person_id):
             # Combine chunks
             with open(final_path, 'wb') as outfile:
                 for i in range(total_chunks):
-                    chunk_path = os.path.join(temp_dir, f'chunk_{i}')
+                    chunk_path = os.path.join(temp_dir, 'chunk_{}'.format(i))
                     if os.path.exists(chunk_path):
                         with open(chunk_path, 'rb') as infile:
                             outfile.write(infile.read())
@@ -183,7 +183,7 @@ def upload_chunk(request, person_id):
             
             # Create database record
             if file_type == 'image':
-                relative_path = f'missing_persons_images/{file_id}.jpg'
+                relative_path = 'missing_persons_images/{}.jpg'.format(file_id)
                 image = MissingPersonImage(
                     missing_person=missing_person,
                     image=relative_path
@@ -196,7 +196,7 @@ def upload_chunk(request, person_id):
                     'url': image.image.url
                 })
             else:  # video
-                relative_path = f'missing_persons_videos/{file_id}.mp4'
+                relative_path = 'missing_persons_videos/{}.mp4'.format(file_id)
                 video = RecordedVideo(
                     missing_person=missing_person,
                     video=relative_path
@@ -275,7 +275,7 @@ def add_webcam_source(request, person_id):
         live_source = LiveVideoSource(
             missing_person=missing_person,
             source_type='webcam',
-            url=f"webcam://{uuid.uuid4()}"  # Generate a unique ID for this webcam source
+            url="webcam://{}".format(uuid.uuid4())  # Generate a unique ID for this webcam source
         )
         live_source.save()
         

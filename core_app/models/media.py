@@ -12,14 +12,14 @@ class MissingPersonImage(models.Model):
     uploaded_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return f"{self.title} - {self.missing_person.full_name}"
+        return "{} - {}".format(self.title, self.missing_person.full_name)
     
     def save(self, *args, **kwargs):
         # Auto-generate title if not provided
         if not self.title:
             # Count existing images and add 1
             count = MissingPersonImage.objects.filter(missing_person=self.missing_person).count() + 1
-            self.title = f"Image {count}"
+            self.title = "Image {}".format(count)
         super().save(*args, **kwargs)
     
     class Meta:
@@ -37,14 +37,14 @@ class RecordedVideo(models.Model):
     uploaded_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return f"{self.title} - {self.missing_person.full_name}"
+        return "{} - {}".format(self.title, self.missing_person.full_name)
     
     def save(self, *args, **kwargs):
         # Auto-generate title if not provided
         if not self.title:
             # Count existing videos and add 1
             count = RecordedVideo.objects.filter(missing_person=self.missing_person).count() + 1
-            self.title = f"Video {count}"
+            self.title = "Video {}".format(count)
         super().save(*args, **kwargs)
     
     class Meta:
@@ -67,14 +67,14 @@ class LiveVideoSource(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return f"{self.title} - {self.missing_person.full_name}"
+        return "{} - {}".format(self.title, self.missing_person.full_name)
     
     def save(self, *args, **kwargs):
         # Auto-generate title if not provided
         if not self.title:
             # Count existing live sources and add 1
             count = LiveVideoSource.objects.filter(missing_person=self.missing_person).count() + 1
-            self.title = f"Live Source {count}"
+            self.title = "Live Source {}".format(count)
         super().save(*args, **kwargs)
     
     class Meta:

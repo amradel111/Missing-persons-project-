@@ -29,7 +29,7 @@ class SearchMatch(models.Model):
     # Add other relevant fields if needed, e.g., bounding_box_data (JSONField)
 
     def __str__(self):
-        return f"Match for {self.missing_person.full_name} at {self.timestamp.strftime('%Y-%m-%d %H:%M:%S')}"
+        return "Match for {} at {}".format(self.missing_person.full_name, self.timestamp.strftime('%Y-%m-%d %H:%M:%S'))
 
     class Meta:
         verbose_name = "Search Match"

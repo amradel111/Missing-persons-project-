@@ -42,7 +42,7 @@ class MissingPerson(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.full_name} ({self.age})"
+        return "{} ({})".format(self.full_name, self.age)
     
     class Meta:
         verbose_name = "Missing Person"
@@ -55,9 +55,9 @@ class MissingPerson(models.Model):
         elapsed = now - self.last_seen_date
         
         if elapsed.days > 0:
-            return f"{elapsed.days} day{'s' if elapsed.days != 1 else ''}"
+            return "{} day{}".format(elapsed.days, 's' if elapsed.days != 1 else '')
         hours = elapsed.seconds // 3600
         if hours > 0:
-            return f"{hours} hour{'s' if hours != 1 else ''}"
+            return "{} hour{}".format(hours, 's' if hours != 1 else '')
         minutes = (elapsed.seconds % 3600) // 60
-        return f"{minutes} minute{'s' if minutes != 1 else ''}" 
+        return "{} minute{}".format(minutes, 's' if minutes != 1 else '') 

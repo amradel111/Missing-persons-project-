@@ -30,7 +30,7 @@ class LiveVideoSource(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.get_source_type_display()} for {self.missing_person.full_name}"
+        return "{} for {}".format(self.get_source_type_display(), self.missing_person.full_name)
 
 class RecordedVideo(models.Model):
     """
@@ -65,12 +65,10 @@ class SearchMatch(models.Model):
     match_video_timestamp = models.CharField(max_length=20, blank=True, null=True, help_text="Timestamp in the recorded video where the match was found (e.g., 00:02:35).")
 
     def __str__(self):
-        source_info = "Live"
         if self.recorded_video:
-            source_info = f"Video '{self.recorded_video.title}' at {self.match_video_timestamp}"
-        elif self.live_video_source:
-            source_info = f"Live feed '{self.live_video_source.id}'"
-            
-        return f"Match for {self.missing_person.full_name} from {source_info}"
+            source_info = "Video '{}' at {}".format(self.recorded_video.title, self.match_video_timestamp)
+        else:
+            source_info = "Live feed '{}'".format(self.live_video_source.id)
+        return "Match for {} from {}".format(self.missing_person.full_name, source_info)
 
 # ... existing code ...
