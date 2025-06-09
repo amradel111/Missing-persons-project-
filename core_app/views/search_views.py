@@ -8,6 +8,7 @@ import uuid
 import json
 import requests
 from django.conf import settings
+from django.urls import reverse
 
 from core_app.models import MissingPerson, LiveVideoSource, SearchMatch
 
@@ -18,6 +19,9 @@ def live_search_redirect(request):
     Gets the person_id from the query parameters and finds an appropriate webcam source.
     """
     person_id = request.GET.get('person_id')
+    source_id = request.GET.get('source_id')  # Get the specific source ID if provided
+    device_id = request.GET.get('device_id')  # Get the webcam device ID if provided
+
     if not person_id:
         return HttpResponseBadRequest("Missing person ID")
     
@@ -25,7 +29,21 @@ def live_search_redirect(request):
         # Get the person and verify ownership
         person = get_object_or_404(MissingPerson, id=person_id, reported_by=request.user)
         
-        # Find the first webcam source
+        # If a specific source_id is provided, use it
+        if source_id:
+            try:
+                webcam_source = LiveVideoSource.objects.get(id=source_id, missing_person=person, source_type='webcam')
+                # Include device_id parameter if provided
+                redirect_url = reverse('core_app:live_search_page', kwargs={'person_id': person.id, 'source_id': webcam_source.id})
+                if device_id:
+                    redirect_url += f'?device_id={device_id}'
+                return redirect(redirect_url)
+            except LiveVideoSource.DoesNotExist:
+                # If the provided source_id is invalid or doesn't belong to the user,
+                # fall through to the default behavior.
+                pass
+
+        # Default behavior: Find the first available webcam source or create a new one
         webcam_source = LiveVideoSource.objects.filter(
             missing_person=person,
             source_type='webcam'
@@ -33,7 +51,10 @@ def live_search_redirect(request):
         
         if webcam_source:
             # Redirect to the live search page with this source
-            return redirect('core_app:live_search_page', person_id=person.id, source_id=webcam_source.id)
+            redirect_url = reverse('core_app:live_search_page', kwargs={'person_id': person.id, 'source_id': webcam_source.id})
+            if device_id:
+                redirect_url += f'?device_id={device_id}'
+            return redirect(redirect_url)
         else:
             # Create a new webcam source
             webcam_source = LiveVideoSource.objects.create(
@@ -41,7 +62,10 @@ def live_search_redirect(request):
                 source_type='webcam',
                 url=f"webcam://auto-created"
             )
-            return redirect('core_app:live_search_page', person_id=person.id, source_id=webcam_source.id)
+            redirect_url = reverse('core_app:live_search_page', kwargs={'person_id': person.id, 'source_id': webcam_source.id})
+            if device_id:
+                redirect_url += f'?device_id={device_id}'
+            return redirect(redirect_url)
             
     except Exception as e:
         return HttpResponseBadRequest(f"Error: {str(e)}")

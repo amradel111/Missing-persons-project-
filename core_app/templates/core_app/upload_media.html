@@ -218,36 +218,10 @@
         display: none;
     }
 
-    .live-source-btn:hover {
-        /* Remove old styles */
-    }
-
     .live-sources-container {
         display: flex;
         gap: 1rem;
         margin-top: 1rem;
-    }
-
-    .url-input-container {
-        display: flex;
-        max-width: 600px;
-        margin-top: 1rem;
-    }
-
-    .url-input {
-        flex-grow: 1;
-        padding: 0.75rem;
-        border: 1px solid #ddd;
-        border-radius: 5px 0 0 5px;
-    }
-
-    .url-submit-btn {
-        padding: 0.75rem 1rem;
-        border: none;
-        border-radius: 0 5px 5px 0;
-        background: #623B81;
-        color: white;
-        cursor: pointer;
     }
 
     .hidden {
@@ -785,12 +759,6 @@
             
             <!-- Live Sources Grid (Now includes add buttons) -->
             <div class="upload-grid" id="live-sources-grid">
-                <!-- Add Live URL Button -->
-                <button type="button" class="upload-btn live-action-btn" id="url-source-btn">
-                    <i class="bi bi-link-45deg"></i>
-                    <span>Live URL</span>
-                </button>
-                
                 <!-- Add Webcam Button -->
                 <button type="button" class="upload-btn live-action-btn" id="webcam-select-btn">
                     <i class="bi bi-camera-video"></i>
@@ -819,12 +787,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- URL Input - Initially Hidden -->
-            <div class="url-input-container hidden" id="url-input-container">
-                <input type="url" class="url-input" placeholder="Enter live stream URL" id="live-url-input">
-                <button class="url-submit-btn" id="url-submit-btn">Add</button>
             </div>
         </div>
         
@@ -895,6 +857,11 @@
         profileMenu.classList.toggle('show');
     }
     
+    // Define these variables globally so they're accessible to the handleStartSearchClick function
+    let isWebcamActive = false;
+    let activeWebcamSourceId = null;
+    let currentDeviceId = null;
+    
     // Handle search button click (global function for inline onclick)
     function handleStartSearchClick() {
         console.log("Start search button clicked via inline handler");
@@ -905,8 +872,21 @@
             const personId = profileSelector.value;
             console.log(`Navigating to live search with person ID: ${personId}`);
             
-            // Use our new server-side redirect URL
-            window.location.href = `/live-search-redirect/?person_id=${personId}`;
+            let redirectUrl = `/live-search-redirect/?person_id=${personId}`;
+            if (isWebcamActive && activeWebcamSourceId) {
+                console.log(`Appending active webcam source ID: ${activeWebcamSourceId}`);
+                redirectUrl += `&source_id=${activeWebcamSourceId}`;
+                
+                // Also pass the device ID if available
+                if (currentDeviceId) {
+                    console.log(`Appending webcam device ID: ${currentDeviceId}`);
+                    redirectUrl += `&device_id=${currentDeviceId}`;
+                }
+            }
+            
+            console.log(`Redirecting to: ${redirectUrl}`);
+            window.location.href = redirectUrl;
+
         } else {
             alert('Please select a missing person profile first');
         }
@@ -939,12 +919,8 @@
         const liveSourcesGrid = document.getElementById('live-sources-grid');
         const imageUploadInput = document.getElementById('image-upload');
         const videoUploadInput = document.getElementById('video-upload');
-        const urlSourceBtn = document.getElementById('url-source-btn');
         const webcamSelectBtn = document.getElementById('webcam-select-btn');
         const mainStartSearchBtn = document.getElementById('main-start-search-btn');
-        const urlInputContainer = document.getElementById('url-input-container');
-        const liveUrlInput = document.getElementById('live-url-input');
-        const urlSubmitBtn = document.getElementById('url-submit-btn');
         const previewOverlay = document.getElementById('media-preview-overlay');
         const previewContent = document.getElementById('media-preview-content');
         const previewCloseBtn = document.getElementById('preview-close-btn');
@@ -968,10 +944,7 @@
         let recordedChunks = [];
         let recordingStartTime = 0;
         let recordingTimerId = null;
-        let currentDeviceId = null;
-        let isWebcamActive = false;
         let backgroundVideoElement = null;
-        let activeWebcamSourceId = null; // Store the ID of the active webcam source from the backend
         
         // Event Listeners for Profile Selection
         if (profileSelector) {
@@ -1171,33 +1144,6 @@
             this.value = '';
         });
         
-        // Live URL Source
-        urlSourceBtn.addEventListener('click', function() {
-            if (!selectedPersonId) {
-                alert('Please select a missing person profile first');
-                return;
-            }
-            
-            urlInputContainer.classList.toggle('hidden');
-        });
-        
-        // Add Live URL
-        urlSubmitBtn.addEventListener('click', function() {
-            if (!selectedPersonId) {
-                alert('Please select a missing person profile first');
-                return;
-            }
-            
-            const url = liveUrlInput.value.trim();
-            if (url) {
-                addLiveUrl(url);
-                liveUrlInput.value = '';
-                urlInputContainer.classList.add('hidden');
-            } else {
-                alert('Please enter a valid URL');
-            }
-        });
-        
         // Webcam Source
         webcamSelectBtn.addEventListener('click', function() {
             if (!selectedPersonId) {
@@ -1207,7 +1153,6 @@
             console.log("Webcam select button clicked - populating devices");
             populateWebcamDevices();
             webcamSelectContainer.classList.remove('hidden');
-            urlInputContainer.classList.add('hidden'); // Hide URL input if open
         });
         
         // Cancel Webcam Selection
@@ -1317,6 +1262,9 @@
                 audio: false
             };
             
+            // Save the device ID globally so it can be passed to the search page
+            currentDeviceId = deviceId;
+            
             navigator.mediaDevices.getUserMedia(constraints)
                 .then(stream => {
                     // Store stream for later use
@@ -1373,8 +1321,9 @@
                 if (xhr.status === 200) {
                     try {
                         const data = JSON.parse(xhr.responseText);
-                        if (data.success) {
-                            console.log('Webcam source added with ID:', data.source_id);
+                        if (data.success && data.source_id) {
+                            activeWebcamSourceId = data.source_id;
+                            console.log('Webcam source added with ID:', activeWebcamSourceId);
                         }
                     } catch (e) {
                         console.error('Error parsing response:', e);
@@ -1676,9 +1625,6 @@
                     console.error('Error loading videos:', error);
                 });
             
-            // Track added sourceIds to prevent duplicates
-            const addedSourceIds = new Set();
-            
             // Load existing live sources
             fetch(`/api/missing-persons/${personId}/live-sources/`)
                 .then(response => {
@@ -1689,47 +1635,30 @@
                     return response.json();
                 })
                 .then(data => {
-                    console.log(`Loaded ${data.length} live sources`);
-                    // First, identify and handle any active sources
-                    const activeWebcam = document.querySelector('.media-thumbnail[data-active-webcam="true"]');
+                    console.log(`Loaded ${data.length} live sources from backend`);
                     
-                    if (activeWebcam) {
-                        const activeId = activeWebcam.id.split('-')[2];
-                        if (activeId) {
-                            addedSourceIds.add(activeId);
-                            console.log(`Already have active webcam with ID: ${activeId}`);
-                        }
-                    }
-                    
-                    // Then process server-side sources
-                    data.forEach(source => {
-                        // Skip if we already have this source rendered
-                        if (addedSourceIds.has(source.id.toString())) {
-                            console.log(`Skipping duplicate source ID: ${source.id}`);
+                    // Filter for only webcam sources
+                    const webcamSources = data.filter(source => source.source_type === 'webcam');
+                    console.log(`Found ${webcamSources.length} webcam sources`);
+
+                    webcamSources.forEach(source => {
+                        // Skip if a thumbnail for this source is already active and displayed
+                        const existingActiveThumb = document.querySelector(`.media-thumbnail[data-source-id="${source.id}"]`);
+                        if (existingActiveThumb) {
+                            console.log(`Skipping already active webcam source with ID: ${source.id}`);
                             return;
                         }
-                        
-                        // Add to tracking set
-                        addedSourceIds.add(source.id.toString());
-                        
-                        // Determine placeholder based on type
-                        const isWebcamPlaceholder = source.source_type === 'webcam';
-                        const placeholderUrl = isWebcamPlaceholder
-                            ? "{% static 'images/webcam-placeholder.svg' %}"
-                            : "{% static 'images/live-stream-placeholder.svg' %}";
-                            
-                        const element = createThumbnailElement(placeholderUrl, source.id, 'live', source.title);
-                        
-                        // Mark webcam sources with a special attribute
-                        if (isWebcamPlaceholder) {
-                            element.setAttribute('data-source-type', 'webcam');
-                        }
-                        
+
+                        const element = createThumbnailElement(
+                            "{% static 'images/webcam-placeholder.svg' %}", 
+                            source.id, 
+                            'live', 
+                            source.description || 'Webcam'
+                        );
+                        element.setAttribute('data-source-type', 'webcam');
+                        element.setAttribute('data-source-id', source.id);
                         liveSourcesGrid.appendChild(element);
                     });
-                    
-                    // Run cleanup to catch any issues
-                    cleanupWebcamSources();
                 })
                 .catch(error => {
                     console.error('Error loading live sources:', error);
@@ -2157,63 +2086,8 @@
             previewOverlay.classList.add('active');
         }
 
-        // Start Search Button Click - Bottom Main Button
-        mainStartSearchBtn.addEventListener('click', function() {
-            console.log("Main search button clicked");
-            if (!selectedPersonId) {
-                alert('Please select a missing person profile first');
-                return;
-            }
-            
-            // Get the first image of the missing person
-            fetch(`/api/missing-persons/${selectedPersonId}/images/`)
-                .then(response => response.json())
-                .then(data => {
-                    if (!data || data.length === 0) {
-                        alert('No images found for this missing person. Please upload at least one photo before starting the search.');
-                        return;
-                    }
-                    
-                    // We have images, now check if person has any webcam sources already
-                    fetch(`/api/missing-persons/${selectedPersonId}/live-sources/`)
-                        .then(response => response.json())
-                        .then(sources => {
-                            // Filter for webcam sources
-                            const webcamSources = sources.filter(source => source.source_type === 'webcam');
-                            
-                            if (isWebcamActive) {
-                                // If webcam is already active, use that
-                                console.log("Using active webcam");
-                                // If we have an active sourceID use that, otherwise create one
-                                if (activeWebcamSourceId) {
-                                    redirectToLiveSearch(selectedPersonId, activeWebcamSourceId);
-                                } else {
-                                    createWebcamSourceAndNavigate(selectedPersonId);
-                                }
-                            } 
-                            else if (webcamSources.length > 0) {
-                                // Use the first webcam source
-                                console.log(`Using existing webcam source: ${webcamSources[0].id}`);
-                                redirectToLiveSearch(selectedPersonId, webcamSources[0].id);
-                            } 
-                            else {
-                                // No webcam sources, ask user to select one
-                                alert('Please select a webcam source first. Click on the "Web Cam" button to set up your camera.');
-                                // Automatically open the webcam selector for convenience
-                                webcamSelectBtn.click();
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error checking webcam sources:', error);
-                            alert('Error checking webcam sources. Please try again.');
-                        });
-                })
-                .catch(error => {
-                    console.error('Error checking images:', error);
-                    alert('Error checking images. Please try again.');
-                });
-        });
-        
+        // REMOVED: Event listener for Start Search Button - using the onclick attribute in HTML instead
+
         // Helper function to redirect to the live search page
         function redirectToLiveSearch(personId, sourceId) {
             console.log(`Redirecting to live search with person ID: ${personId}, source ID: ${sourceId}`);

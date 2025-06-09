@@ -409,6 +409,9 @@
     const missingPersonId = "{{ missing_person.id }}";
     // Use source_id_for_logging if available, otherwise null or a generic marker
     const liveSourceIdForLogging = "{{ source_id_for_logging|default_if_none:'null' }}";
+    // Get device ID from URL query parameters if available
+    const urlParams = new URLSearchParams(window.location.search);
+    const selectedDeviceId = urlParams.get('device_id');
 
     let stream;
     let processingIntervalId;
@@ -417,12 +420,23 @@
 
     async function setupWebcam() {
         try {
+            // Configure video constraints based on whether we have a specific device ID
+            const videoConstraints = { 
+                width: 640, 
+                height: 480
+            };
+            
+            // If we have a specific device ID, use it
+            if (selectedDeviceId) {
+                console.log(`Using specific camera with ID: ${selectedDeviceId}`);
+                videoConstraints.deviceId = { exact: selectedDeviceId };
+            } else {
+                console.log('No specific camera selected, using default camera');
+                videoConstraints.facingMode = "user"; // Default to front camera
+            }
+            
             stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { 
-                    width: 640, 
-                    height: 480,
-                    facingMode: "user" // Ensure front camera is used
-                }, 
+                video: videoConstraints, 
                 audio: false 
             });
             videoElement.srcObject = stream;
