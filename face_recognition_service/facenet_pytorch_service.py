@@ -56,6 +56,16 @@ Path(models_dir).mkdir(parents=True, exist_ok=True)
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 print(f"Using device: {device}")
 
+# --- START: Added Confirmation Log ---
+if torch.cuda.is_available():
+    print("✅ Success! PyTorch is using CUDA.")
+    print(f"   - GPU: {torch.cuda.get_device_name(0)}")
+else:
+    print("⚠️  Notice: PyTorch is using the CPU.")
+    print("   - CUDA is either not available or not installed correctly.")
+    print("   - For GPU acceleration, ensure NVIDIA drivers are installed and a CUDA-enabled PyTorch version is used.")
+# --- END: Added Confirmation Log ---
+
 # Initialize MTCNN for face detection
 print("Loading MTCNN face detector...")
 mtcnn = MTCNN(
